@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 void main() {
   runApp(const BusTimingApp());
@@ -40,6 +41,46 @@ class _BusTimingPageState extends State<BusTimingPage> {
       }
     }
     return "No more buses today";
+  }
+
+  void _deleteBusTiming(int index) {
+    setState(() {
+      busTimings.removeAt(index);
+    });
+  }
+
+  void _editBusTiming(int index) {
+    _timeController.text = busTimings[index];
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Bus Timing"),
+        content: TextField(
+          controller: _timeController,
+          decoration: const InputDecoration(labelText: "Enter Time (HH:MM)"),
+          keyboardType: TextInputType.datetime,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_timeController.text.isNotEmpty) {
+                setState(() {
+                  busTimings[index] = _timeController.text;
+                });
+              }
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _addNewBusTiming(String newTime) {
@@ -93,16 +134,30 @@ class _BusTimingPageState extends State<BusTimingPage> {
               child: ListView.builder(
                 itemCount: busTimings.length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
+                  return Slidable(
+                    key: ValueKey(busTimings[index]),
+                    startActionPane: ActionPane(
+                      motion: const DrawerMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) => _editBusTiming(index),
+                          backgroundColor: Colors.blue,
+                          icon: Icons.edit,
+                          label: 'Edit',
+                        ),
+                        SlidableAction(
+                          onPressed: (context) => _deleteBusTiming(index),
+                          backgroundColor: Colors.red,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        ),
+                      ],
+                    ),
                     child: ListTile(
+                      tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       title: Text(
                         busTimings[index],
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                   );
