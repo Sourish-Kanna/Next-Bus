@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-List<String> busTimings = ["08:00", "09:00", "10:30", "16:50", "23:50"];
+List<String> busTimings = ["08:00", "09:00", "10:30", "12:30", "16:50", "23:50"];
 
 class NextTime extends StatefulWidget {
   const NextTime({super.key});
@@ -11,9 +11,6 @@ class NextTime extends StatefulWidget {
 }
 
 class _NextTimeState extends State<NextTime> {
-  Set<int> swipedIndices = {};
-
-
   String getNextBus() {
     DateTime now = DateTime.now();
     for (String time in busTimings) {
