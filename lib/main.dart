@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter/services.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const BusTimingApp());
 }
 
@@ -10,13 +17,28 @@ class BusTimingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Bus Timing App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      home: const BusTimingPage(),
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        ColorScheme lightColorScheme;
+        ColorScheme darkColorScheme;
+
+        if (lightDynamic != null && darkDynamic != null) {
+          lightColorScheme = lightDynamic.harmonized();
+          darkColorScheme = darkDynamic.harmonized();
+        } else {
+          // Fallback to default Material 3 color schemes
+          lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.green);
+          darkColorScheme = ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.dark);
+        }
+
+        return MaterialApp(
+          title: 'Next Bus',
+          theme: ThemeData(colorScheme: lightColorScheme, useMaterial3: true),
+          darkTheme: ThemeData(colorScheme: darkColorScheme, useMaterial3: true),
+          themeMode: ThemeMode.system, // Follows system theme
+          home: const BusTimingPage(),
+        );
+      },
     );
   }
 }
@@ -98,7 +120,7 @@ class _BusTimingPageState extends State<BusTimingPage> {
     return Scaffold(
       appBar: AppBar(
         // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Bus Timing App'),
+        title: const Text('Next Bus'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -108,7 +130,7 @@ class _BusTimingPageState extends State<BusTimingPage> {
           children: [
             // Header Section
             Text(
-              "Next Bus:",
+              "Next Bus at:",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
