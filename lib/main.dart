@@ -36,12 +36,157 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightColorScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkColorScheme, useMaterial3: true),
           themeMode: ThemeMode.system, // Follows system theme
-          home: const BusTimingPage(),
+          home: const BusHomePage(),
         );
       },
     );
   }
 }
+
+class BusHomePage extends StatelessWidget {
+  const BusHomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Next Bus'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Section
+            Text(
+              "Next Bus at:",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            Text(
+              getNextBus(),
+              style: TextStyle(
+                fontSize: 36,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Bus Timing List Section
+            Text(
+              "All Timings:",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: busTimings.length,
+                itemBuilder: (context, index) {
+                  bool isSwiped = swipedIndices.contains(index);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                    child: Slidable(
+                      key: ValueKey(busTimings[index]),
+                      startActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context)  {
+                              setState(() {
+                                swipedIndices.add(index);
+                              });
+                              _deleteBusTiming(index);
+                            },
+                            backgroundColor: Colors.red,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                          ),
+                        ],
+                      ),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              setState(() {
+                                swipedIndices.add(index);
+                              });
+                              _editBusTiming(index);
+                            },
+                            backgroundColor: Colors.blue,
+                            icon: Icons.edit,
+                            label: 'Edit',
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: isSwiped
+                              ? BorderRadius.zero // Not rounded when swiped
+                              : BorderRadius.circular(12), // Rounded when not swiped
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            busTimings[index],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+            ),
+
+            // Input Section
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _timeController,
+                    decoration: InputDecoration(
+                      labelText: "Enter Time (HH:MM)",
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    keyboardType: TextInputType.datetime,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary, // Text color
+                  ),
+                  onPressed: () {
+                    if (_timeController.text.isNotEmpty) {
+                      _addNewBusTiming(_timeController.text);
+                    }
+                  },
+                  child: const Text("Add"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 class BusTimingPage extends StatefulWidget {
   const BusTimingPage({super.key});
@@ -51,6 +196,7 @@ class BusTimingPage extends StatefulWidget {
 }
 
 class _BusTimingPageState extends State<BusTimingPage> {
+
   List<String> busTimings = ["08:00", "09:00", "10:30"];
   Set<int> swipedIndices = {};
   final TextEditingController _timeController = TextEditingController();
@@ -157,67 +303,67 @@ class _BusTimingPageState extends State<BusTimingPage> {
             ),
             Expanded(
               child: ListView.builder(
-              itemCount: busTimings.length,
-              itemBuilder: (context, index) {
-                bool isSwiped = swipedIndices.contains(index);
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
-                  child: Slidable(
-                    key: ValueKey(busTimings[index]),
-                    startActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context)  {
-                            setState(() {
-                              swipedIndices.add(index);
-                            });
-                            _deleteBusTiming(index);
-                          },
-                          backgroundColor: Colors.red,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                        ),
-                      ],
-                    ),
-                    endActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) {
-                            setState(() {
-                              swipedIndices.add(index);
-                            });
-                            _editBusTiming(index);
-                          },
-                          backgroundColor: Colors.blue,
-                          icon: Icons.edit,
-                          label: 'Edit',
-                          borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
-                        ),
-                      ],
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: isSwiped
-                            ? BorderRadius.zero // Not rounded when swiped
-                            : BorderRadius.circular(12), // Rounded when not swiped
+                itemCount: busTimings.length,
+                itemBuilder: (context, index) {
+                  bool isSwiped = swipedIndices.contains(index);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                    child: Slidable(
+                      key: ValueKey(busTimings[index]),
+                      startActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context)  {
+                              setState(() {
+                                swipedIndices.add(index);
+                              });
+                              _deleteBusTiming(index);
+                            },
+                            backgroundColor: Colors.red,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                          ),
+                        ],
                       ),
-                      child: ListTile(
-                        title: Text(
-                          busTimings[index],
-                          style: Theme.of(context).textTheme.bodyMedium,
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              setState(() {
+                                swipedIndices.add(index);
+                              });
+                              _editBusTiming(index);
+                            },
+                            backgroundColor: Colors.blue,
+                            icon: Icons.edit,
+                            label: 'Edit',
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: isSwiped
+                              ? BorderRadius.zero // Not rounded when swiped
+                              : BorderRadius.circular(12), // Rounded when not swiped
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            busTimings[index],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
 
-      ),
+            ),
 
             // Input Section
             Row(
