@@ -1,76 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:next_bus/bus_timing_provider.dart';
+import 'package:provider/provider.dart';
 
-List<String> busTimings = ["08:00", "09:00", "10:30", "12:30", "16:50", "23:50"];
-
-class NextTime extends StatefulWidget {
+class NextTime extends StatelessWidget {
   const NextTime({super.key});
 
   @override
-  State<NextTime> createState() => _NextTimeState();
-}
-
-class _NextTimeState extends State<NextTime> {
-  String getNextBus() {
-    DateTime now = DateTime.now();
-    for (String time in busTimings) {
-      DateTime busTime = DateTime.parse("${now.year}-${now.month}-${now.day} $time:00");
-      if (now.isBefore(busTime)) {
-        return time;
-      }
-    }
-    return "No more buses today";
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header Section
-            Text(
-              "Next Bus at:",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+    return Consumer<BusTimingProvider>(
+        builder: (context, provider, child) {
+          String getNextBus() {
+            DateTime now = DateTime.now();
+            for (String time in provider.busTimings) {
+              DateTime busTime = DateTime.parse("${now.year}-${now.month}-${now.day} $time:00");
+              if (now.isBefore(busTime)) {
+                return time;
+              }
+            }
+            return "No more buses today";
+          }
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header Section
+              Text(
+                "Next Bus at:",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
-            Text(
-              getNextBus(),
-              style: TextStyle(
-                fontSize: 36,
-                color: Theme.of(context).colorScheme.secondary,
+              Text(
+                getNextBus(),
+                style: TextStyle(
+                  fontSize: 36,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
               ),
-            ),
-          ],
-        );
+            ],
+          );
+        },
+    );
   }
 }
 
-
-class ListDisplay extends StatefulWidget {
+class ListDisplay extends StatelessWidget {
   const ListDisplay({super.key});
 
   @override
-  State<ListDisplay> createState() => _ListDisplayState();
-}
-
-class _ListDisplayState extends State<ListDisplay> {
-
-  Set<int> swipedIndices = {};
-  final TextEditingController _timeController = TextEditingController();
-
-  void _deleteBusTiming(int index) {
-    setState(() {
-      busTimings.removeAt(index);
-      swipedIndices.remove(index);
-    });
+  Widget build(BuildContext context) {
+    return Consumer<BusTimingProvider>(
+      builder: (context, provider, child) {
+        return Expanded(
+          child: ListView.builder(
+            itemCount: provider.busTimings.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                child: Slidable(
+                  key: ValueKey(provider.busTimings[index]),
+                  startActionPane: ActionPane(
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          provider.deleteBusTiming(index);
+                        },
+                        backgroundColor: Colors.red,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                      ),
+                    ],
+                  ),
+                  endActionPane: ActionPane(
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          // Handle editing
+                          _editBusTiming(context, index, provider);
+                        },
+                        backgroundColor: Colors.blue,
+                        icon: Icons.edit,
+                        label: 'Edit',
+                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        provider.busTimings[index],
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          );
+      },
+    );
   }
 
-  void _editBusTiming(int index) {
-    _timeController.text = busTimings[index];
+  void _editBusTiming(BuildContext context, int index, BusTimingProvider provider) {
+    TextEditingController _timeController = TextEditingController(text: provider.busTimings[index]);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -90,9 +133,7 @@ class _ListDisplayState extends State<ListDisplay> {
           ElevatedButton(
             onPressed: () {
               if (_timeController.text.isNotEmpty) {
-                setState(() {
-                  busTimings[index] = _timeController.text;
-                });
+                provider.editBusTiming(index, _timeController.text);
               }
               Navigator.pop(context);
             },
@@ -102,100 +143,16 @@ class _ListDisplayState extends State<ListDisplay> {
       ),
     );
   }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: busTimings.length,
-        itemBuilder: (context, index) {
-          bool isSwiped = swipedIndices.contains(index);
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
-            child: Slidable(
-              key: ValueKey(busTimings[index]),
-              startActionPane: ActionPane(
-                motion: const DrawerMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context)  {
-                      setState(() {
-                        swipedIndices.add(index);
-                      });
-                      _deleteBusTiming(index);
-                    },
-                    backgroundColor: Colors.red,
-                    icon: Icons.delete,
-                    label: 'Delete',
-                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                  ),
-                ],
-              ),
-              endActionPane: ActionPane(
-                motion: const DrawerMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) {
-                      setState(() {
-                        swipedIndices.add(index);
-                      });
-                      _editBusTiming(index);
-                    },
-                    backgroundColor: Colors.blue,
-                    icon: Icons.edit,
-                    label: 'Edit',
-                    borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
-                  ),
-                ],
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: isSwiped
-                      ? BorderRadius.zero // Not rounded when swiped
-                      : BorderRadius.circular(12), // Rounded when not swiped
-                ),
-                child: ListTile(
-                  title: Text(
-                    busTimings[index],
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-
-    );
-  }
 }
 
 
-class AddTime extends StatefulWidget {
+class AddTime extends StatelessWidget {
   const AddTime({super.key});
 
   @override
-  State<AddTime> createState() => _AddTimeState();
-}
-
-class _AddTimeState extends State<AddTime> {
-
-  List<String> busTimings = ["08:00", "09:00", "10:30"];
-  final TextEditingController _timeController = TextEditingController();
-
-
-  void _addNewBusTiming(String newTime) {
-    setState(() {
-      busTimings.add(newTime);
-      busTimings.sort();
-    });
-    _timeController.clear();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    TextEditingController _timeController = TextEditingController();
+
     return Row(
       children: [
         Expanded(
@@ -214,11 +171,12 @@ class _AddTimeState extends State<AddTime> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary, // Text color
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () {
             if (_timeController.text.isNotEmpty) {
-              _addNewBusTiming(_timeController.text);
+              Provider.of<BusTimingProvider>(context, listen: false).addBusTiming(_timeController.text);
+              _timeController.clear();
             }
           },
           child: const Text("Add"),

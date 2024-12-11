@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:next_bus/logics.dart';
+import 'package:provider/provider.dart';
+import 'bus_timing_provider.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,7 +12,10 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(const BusTimingApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => BusTimingProvider(),
+    child: const BusTimingApp(),
+  ),);
 }
 
 class BusTimingApp extends StatelessWidget {
@@ -54,7 +60,7 @@ class BusHomePage extends StatelessWidget {
         title: const Text('Next Bus'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           // crossAxisAlignment: CrossAxisAlignment.stretch,
