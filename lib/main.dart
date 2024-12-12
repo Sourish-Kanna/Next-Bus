@@ -56,28 +56,56 @@ class BusHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Next Bus'),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
+        padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           // crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            NextTime(),
+            const NextTime(),
             const SizedBox(height: 20),
             // Bus Timing List Section
             Text(
               "All Timings:",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            ListDisplay(),
-            AddTime()
+            const ListDisplay(),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const AddTime(),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        onPressed: () {
+                          null;},
+                        child: const Text(
+                          "View Entries",
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.normal
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),

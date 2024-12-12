@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 import 'package:next_bus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -10,25 +11,26 @@ class NextTime extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<BusTimingProvider>(
         builder: (context, provider, child) {
+
           String getNextBus() {
             DateTime now = DateTime.now();
             for (String time in provider.busTimings) {
-              DateTime busTime = DateTime.parse("${now.year}-${now.month}-${now.day} $time:00");
+              String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
+              DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
               if (now.isBefore(busTime)) {
                 return time;
               }
             }
             return "No more buses today";
           }
+
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header Section
               Text(
                 "Next Bus at:",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 36,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
                 ),
@@ -36,7 +38,8 @@ class NextTime extends StatelessWidget {
               Text(
                 getNextBus(),
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
@@ -94,13 +97,23 @@ class ListDisplay extends StatelessWidget {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
-                      title: Text(
-                        provider.busTimings[index],
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            provider.busTimings[index],
+                            selectionColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.normal,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -114,13 +127,13 @@ class ListDisplay extends StatelessWidget {
   }
 
   void _editBusTiming(BuildContext context, int index, BusTimingProvider provider) {
-    TextEditingController _timeController = TextEditingController(text: provider.busTimings[index]);
+    TextEditingController timeController = TextEditingController(text: provider.busTimings[index]);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Edit Bus Timing"),
         content: TextField(
-          controller: _timeController,
+          controller: timeController,
           decoration: const InputDecoration(labelText: "Enter Time (HH:MM)"),
           keyboardType: TextInputType.datetime,
         ),
@@ -133,8 +146,8 @@ class ListDisplay extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (_timeController.text.isNotEmpty) {
-                provider.editBusTiming(index, _timeController.text);
+              if (timeController.text.isNotEmpty) {
+                provider.editBusTiming(index, timeController.text);
               }
               Navigator.pop(context);
             },
@@ -152,37 +165,22 @@ class AddTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController _timeController = TextEditingController();
 
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _timeController,
-            decoration: InputDecoration(
-              labelText: "Enter Time (HH:MM)",
-              border: const OutlineInputBorder(),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-            keyboardType: TextInputType.datetime,
-          ),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
+      onPressed: () {
+        Provider.of<BusTimingProvider>(context, listen: false).addBusTiming();
+      },
+      child: const Text(
+        "Add time",
+        style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal
         ),
-        const SizedBox(width: 10),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          ),
-          onPressed: () {
-            if (_timeController.text.isNotEmpty) {
-              Provider.of<BusTimingProvider>(context, listen: false).addBusTiming(_timeController.text);
-              _timeController.clear();
-            }
-          },
-          child: const Text("Add"),
-        ),
-      ],
+      ),
     );
   }
 }
