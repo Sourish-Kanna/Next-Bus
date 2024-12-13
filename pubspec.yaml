@@ -1,5 +1,5 @@
 name: next_bus
-description: "An App to store bus timming and to show when next bus will come"
+description: "An App to store bus timing and to show when next bus will come"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,6 +35,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_slidable: ^3.1.1
+  dynamic_color: ^1.7.0
+  provider: ^6.1.2
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:
