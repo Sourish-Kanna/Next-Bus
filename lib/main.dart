@@ -33,8 +33,8 @@ class BusTimingApp extends StatelessWidget {
           darkColorScheme = darkDynamic.harmonized();
         } else {
           // Fallback to default Material 3 color schemes
-          lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.green);
-          darkColorScheme = ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.dark);
+          lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+          darkColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark);
         }
 
         return MaterialApp(
