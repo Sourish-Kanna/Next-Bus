@@ -4,6 +4,19 @@ import 'package:intl/intl.dart';
 import 'package:next_bus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
 
+
+DateTime stringToDate(String time) {
+  DateTime now = DateTime.now();
+  String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
+  DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
+  return busTime;
+}
+
+String dateToString(DateTime time){
+  return DateFormat('h:mm a').format(time);
+}
+
+
 class NextTime extends StatelessWidget {
   const NextTime({super.key});
 
@@ -14,11 +27,11 @@ class NextTime extends StatelessWidget {
 
           String getNextBus() {
             DateTime now = DateTime.now();
-            for (String time in provider.busTimings) {
-              String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
-              DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
-              if (now.isBefore(busTime)) {
-                return time;
+            for (DateTime time in provider.busTimings) {
+              // String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
+              // DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
+              if (now.isBefore(time)) {
+                return dateToString(time);
               }
             }
             return "No more buses today";
@@ -105,7 +118,7 @@ class ListDisplay extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            provider.busTimings[index],
+                            dateToString(provider.busTimings[index]),
                             selectionColor: Theme.of(context).colorScheme.onPrimaryContainer,
                             style: TextStyle(
                               fontSize: 20,
@@ -127,7 +140,7 @@ class ListDisplay extends StatelessWidget {
   }
 
   void _editBusTiming(BuildContext context, int index, BusTimingProvider provider) {
-    TextEditingController timeController = TextEditingController(text: provider.busTimings[index]);
+    TextEditingController timeController = TextEditingController(text: dateToString(provider.busTimings[index]));
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -147,7 +160,7 @@ class ListDisplay extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               if (timeController.text.isNotEmpty) {
-                provider.editBusTiming(index, timeController.text);
+                provider.editBusTiming(index, stringToDate(timeController.text));
               }
               Navigator.pop(context);
             },
