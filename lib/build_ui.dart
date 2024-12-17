@@ -5,22 +5,12 @@ import 'package:next_bus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
 
 
-DateTime stringToDate(String time) {
-  DateTime newTime = DateFormat('h:mm a').parse(time);
-  return newTime;
-}
-
-String dateToString(DateTime time){
-  return DateFormat('h:mm a').format(time);
-}
-
-
 class NextTime extends StatelessWidget {
   const NextTime({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusTimingProvider>(
+    return Consumer<BusTimingList>(
         builder: (context, provider, child) {
 
           String getNextBus() {
@@ -67,7 +57,7 @@ class ListDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusTimingProvider>(
+    return Consumer<BusTimingList>(
       builder: (context, provider, child) {
         return Expanded(
           child: ListView.builder(
@@ -136,7 +126,7 @@ class ListDisplay extends StatelessWidget {
     );
   }
 
-  void _editBusTiming(BuildContext context, int index, BusTimingProvider provider) {
+  void _editBusTiming(BuildContext context, int index, BusTimingList provider) {
     TextEditingController timeController = TextEditingController(text: dateToString(provider.busTimings[index]));
     showDialog(
       context: context,
@@ -182,7 +172,7 @@ class AddTime extends StatelessWidget {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       onPressed: () {
-        Provider.of<BusTimingProvider>(context, listen: false).addBusTiming();
+        Provider.of<BusTimingList>(context, listen: false).addBusTiming();
       },
       child: const Text(
         "Add time",

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+DateTime stringToDate(String time) {
+  DateTime newTime = DateFormat('h:mm a').parse(time);
+  return newTime;
+}
 
-class BusTimingProvider with ChangeNotifier {
+String dateToString(DateTime time){
+  return DateFormat('h:mm a').format(time);
+}
+
+class BusTimingList with ChangeNotifier {
   final List<DateTime> _busTimings = [
     DateFormat('hh:mm a').parse("08:00 AM"), DateFormat('hh:mm a').parse("08:15 AM"),
     DateFormat('hh:mm a').parse("09:00 AM"), DateFormat('hh:mm a').parse("10:15 AM"),
