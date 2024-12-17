@@ -6,10 +6,8 @@ import 'package:provider/provider.dart';
 
 
 DateTime stringToDate(String time) {
-  DateTime now = DateTime.now();
-  String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
-  DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
-  return busTime;
+  DateTime newTime = DateFormat('h:mm a').parse(time);
+  return newTime;
 }
 
 String dateToString(DateTime time){
@@ -27,10 +25,10 @@ class NextTime extends StatelessWidget {
 
           String getNextBus() {
             DateTime now = DateTime.now();
+            String formattedTime = DateFormat('h:mm a').format(now);
+            DateTime timeNew = DateFormat('h:mm a').parse(formattedTime);
             for (DateTime time in provider.busTimings) {
-              // String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
-              // DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
-              if (now.isBefore(time)) {
+              if (timeNew.isBefore(time)) {
                 return dateToString(time);
               }
             }
@@ -119,7 +117,6 @@ class ListDisplay extends StatelessWidget {
                         children: [
                           Text(
                             dateToString(provider.busTimings[index]),
-                            selectionColor: Theme.of(context).colorScheme.onPrimaryContainer,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.normal,

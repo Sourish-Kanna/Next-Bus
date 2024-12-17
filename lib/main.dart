@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:next_bus/logics.dart';
 import 'package:provider/provider.dart';
-import 'bus_timing_provider.dart';
-
+import 'package:next_bus/bus_timing_provider.dart';
+import 'package:next_bus/all_entries.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,7 +92,10 @@ class BusHomePage extends StatelessWidget {
                           foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         ),
                         onPressed: () {
-                          null;},
+                          Navigator.push(
+                            context, MaterialPageRoute(builder: (context) =>
+                              const NewPage()), );
+                          },
                         child: const Text(
                           "View Entries",
                           style: TextStyle(
