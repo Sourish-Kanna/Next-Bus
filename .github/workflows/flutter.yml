@@ -56,6 +56,11 @@ jobs:
       - name: Build the app
         run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
 
+      - name: List build directory
+        run: |
+          ls -R build/app/outputs/flutter-apk/
+      
+
       # Upload APK to GitHub Release
       - name: Upload APK to GitHub Release
         uses: actions/upload-artifact@v3
@@ -71,5 +76,5 @@ jobs:
         with:
           tag_name: ${{ env.NEW_VERSION }}
           release_name: Release ${{ env.NEW_VERSION }}
-          draft: false
+          draft: true
           prerelease: false
