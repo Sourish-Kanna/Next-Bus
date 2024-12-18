@@ -39,18 +39,26 @@ jobs:
           echo "Latest tag: $TAG"
           echo "TAG=$TAG" >> $GITHUB_ENV  # Write to environment file
 
-      # Increment the version
+      # Increment Version with Tag Conflict Check
       - name: Increment Version
         id: increment_version
         run: |
-          VERSION_TAG=${{ env.TAG }}
-          VERSION_NUMBER=${VERSION_TAG:1}  # Remove the 'v' prefix
-          VERSION_PARTS=(${VERSION_NUMBER//./ })  # Split into array based on '.'
-          PATCH_VERSION=${VERSION_PARTS[2]}
-          PATCH_VERSION=$((PATCH_VERSION + 1))  # Increment patch version
-          NEW_VERSION="v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH_VERSION"
+          TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          VERSION_TAG=${TAG:1}  # Remove the 'v' prefix
+          VERSION_PARTS=(${VERSION_TAG//./ })
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          PATCH=$((PATCH + 1))
+
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          while git tag -l | grep -q "^$NEW_VERSION$"; do
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          done
+
           echo "New Version: $NEW_VERSION"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV  # Write to environment file
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       # Build the app
       - name: Build the app
@@ -69,6 +77,8 @@ jobs:
       # Push New Tag
       - name: Push New Tag
         run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
