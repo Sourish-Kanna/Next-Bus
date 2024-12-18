@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+        contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: app-release.apk
-          path: build/app/outputs/flutter-apk/release/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk 
 
       # Create GitHub Release
       - name: Create GitHub Release
