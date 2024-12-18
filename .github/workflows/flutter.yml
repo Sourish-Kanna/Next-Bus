@@ -45,7 +45,8 @@ jobs:
 
       # Build the app
       - name: Build the app
-        run: flutter build apk --release --version-name ${{ env.NEW_VERSION }} --version-code $(( $GITHUB_RUN_NUMBER + 1 ))
+        run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
+
 
       # Upload APK to GitHub Release
       - name: Upload APK to GitHub Release
