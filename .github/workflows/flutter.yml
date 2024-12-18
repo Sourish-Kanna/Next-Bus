@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adoptium'
+          distribution: 'zulu'
 
       # Set up Flutter (use version 3.24.5)
       - uses: subosito/flutter-action@v2
