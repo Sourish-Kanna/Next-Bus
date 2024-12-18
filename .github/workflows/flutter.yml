@@ -14,12 +14,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0  # Ensure all history is fetched
+    
+      # Ensure on the main branch before pulling
+      - name: Switch to Main Branch
+        run: |
+          git switch main || git checkout -b main origin/main  # Switch to main or create it from remote
+    
       # Fetch all Git tags
       - name: Fetch All Tags
-        run: |
-          git fetch --tags
-          git pull origin --tags
+        run: git fetch --tags
 
       # Set up JDK 17
       - name: Set up JDK 17
