@@ -1,8 +1,8 @@
 name: Flutter
 
 on:
-  push:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -13,10 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Set up Flutter
+      # Install Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adoptopenjdk'
+
+      # Set up Flutter (use version 3.24.5)
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.24.5'  # Use Flutter version 3.24.5
 
       # Install dependencies
       - run: flutter pub get
@@ -28,7 +35,6 @@ jobs:
           TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")  # Fallback if no tags are found
           echo "Latest tag: $TAG"
           echo "TAG=$TAG" >> $GITHUB_ENV
-
 
       # Increment the version
       - name: Increment Version
@@ -46,7 +52,6 @@ jobs:
       # Build the app
       - name: Build the app
         run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
-
 
       # Upload APK to GitHub Release
       - name: Upload APK to GitHub Release
