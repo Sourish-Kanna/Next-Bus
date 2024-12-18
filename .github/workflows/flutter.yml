@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # Set up Flutter
-      - uses: flutter-action/setup-flutter@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: 'latest'
 
