@@ -1,8 +1,8 @@
 name: Flutter
 
 on:
-  # push:
-  #   branches: [ "main" ]
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -13,34 +13,53 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subhedar/flutter-action@v2
+      # Set up Flutter
+      - uses: flutter-action/setup-flutter@v2
         with:
           flutter-version: 'latest'
 
+      # Install dependencies
       - run: flutter pub get
 
-      - name: Determine Next Version
-        uses: actions/version@v3
-        with:
-          major-version: 1
-          minor-version: 0
-          patch-version: 0
+      # Get the latest Git tag
+      - name: Get Latest Git Tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "Latest tag: $TAG"
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
+      # Increment the version
+      - name: Increment Version
+        id: increment_version
+        run: |
+          VERSION_TAG=${{ env.TAG }}
+          VERSION_NUMBER=${VERSION_TAG:1}  # Remove the 'v' prefix
+          VERSION_PARTS=(${VERSION_NUMBER//./ })  # Split into array based on '.'
+          PATCH_VERSION=${VERSION_PARTS[2]}
+          PATCH_VERSION=$((PATCH_VERSION + 1))  # Increment patch version
+          NEW_VERSION="v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH_VERSION"
+          echo "New Version: $NEW_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      # Build the app
       - name: Build the app
-        run: flutter build apk --release --version-name ${{ steps.determine-next-version.outputs.VERSION }} --version-code ${{ steps.determine-next-version.outputs.BUILD_VERSION }}
+        run: flutter build apk --release --version-name ${{ env.NEW_VERSION }} --version-code $(( $GITHUB_RUN_NUMBER + 1 ))
 
-      # - name: Upload APK to GitHub Release
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: app-release.apk
-      #     path: build/app/outputs/flutter-apk/release/app-release.apk
+      # Upload APK to GitHub Release
+      - name: Upload APK to GitHub Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/release/app-release.apk
 
-      # - name: Create GitHub Release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: v${{ steps.determine-next-version.outputs.VERSION }}
-      #     release_name: Release v${{ steps.determine-next-version.outputs.VERSION }}
-      #     draft: false
-      #     prerelease: false
+      # Create GitHub Release
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          release_name: Release ${{ env.NEW_VERSION }}
+          draft: false
+          prerelease: false
