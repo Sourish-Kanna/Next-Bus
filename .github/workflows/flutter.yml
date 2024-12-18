@@ -1,8 +1,8 @@
 name: Flutter
 
 on:
-  push:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -29,18 +29,18 @@ jobs:
       - name: Build the app
         run: flutter build apk --release --version-name ${{ steps.determine-next-version.outputs.VERSION }} --version-code ${{ steps.determine-next-version.outputs.BUILD_VERSION }}
 
-      - name: Upload APK to GitHub Release
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release.apk
-          path: build/app/outputs/flutter-apk/release/app-release.apk
+      # - name: Upload APK to GitHub Release
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: app-release.apk
+      #     path: build/app/outputs/flutter-apk/release/app-release.apk
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.determine-next-version.outputs.VERSION }}
-          release_name: Release v${{ steps.determine-next-version.outputs.VERSION }}
-          draft: false
-          prerelease: false
+      # - name: Create GitHub Release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: v${{ steps.determine-next-version.outputs.VERSION }}
+      #     release_name: Release v${{ steps.determine-next-version.outputs.VERSION }}
+      #     draft: false
+      #     prerelease: false
