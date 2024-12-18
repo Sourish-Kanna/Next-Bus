@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:next_bus/bus_timing_provider.dart';
+import 'package:nextbus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
 
 
