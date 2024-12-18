@@ -57,6 +57,15 @@ class BusTimingList with ChangeNotifier {
     notifyListeners();
   }
 
+  void undoAddBusTiming(DateTime now) {
+    String formattedTime = DateFormat('h:mm a').format(now);
+    DateTime time = DateFormat('h:mm a').parse(formattedTime);
+    int index = _busTimings.indexOf(time);
+    _busTimings.removeAt(index);
+    _busTimings.sort();
+    notifyListeners();
+  }
+
   void deleteBusTiming(int index) {
     _busTimings.removeAt(index);
     _busTimings.sort();

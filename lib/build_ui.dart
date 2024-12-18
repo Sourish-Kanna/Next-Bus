@@ -4,6 +4,31 @@ import 'package:intl/intl.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
 
+SnackBar addSnackBar(BuildContext context, String text, ) {
+  DateTime now = DateTime.now();
+  return SnackBar(
+    backgroundColor: Theme.of(context).colorScheme.
+    inverseSurface.withOpacity(0.95),
+    behavior: SnackBarBehavior.floating,
+    content: Text(text,
+      style: TextStyle(
+        fontSize: 16,
+        color: Theme.of(context).colorScheme.onInverseSurface,
+      ),
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30.0),
+    ),
+    action: text=="Time Added" ? SnackBarAction(
+      label: "Undo",
+      onPressed: () {
+        Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(now);
+      },
+    ) : null ,
+    duration: Duration(seconds: 3),
+  );
+}
+
 
 class NextTime extends StatelessWidget {
   const NextTime({super.key});
@@ -173,6 +198,9 @@ class AddTime extends StatelessWidget {
       ),
       onPressed: () {
         Provider.of<BusTimingList>(context, listen: false).addBusTiming();
+        ScaffoldMessenger.of(context).showSnackBar(
+          addSnackBar(context, "Time Added"),
+        );
       },
       child: const Text(
         "Add time",
