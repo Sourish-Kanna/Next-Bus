@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878462952161",
+    "project_id": "next-bus-31103",
+    "storage_bucket": "next-bus-31103.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878462952161:android:c0f4ca92e5dbb100400da0",
+        "android_client_info": {
+          "package_name": "com.example.nextbus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhmxMFTSut-kIg76pXzsgH0jP9gx01NaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
