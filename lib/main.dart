@@ -81,7 +81,7 @@ class BusHomePage extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            const ListDisplay(),
+            ListHome(),
             const SizedBox(height: 5),
             Row(
               children: [
