@@ -20,7 +20,7 @@ jobs:
       # Ensure on the main branch before pulling
       - name: Switch to Main Branch
         run: |
-          git switch main || git checkout -b main origin/main  # Switch to main or create it from remote
+          git switch main || git checkout -b main origin/main 
     
       # Fetch all Git tags
       - name: Fetch All Tags
@@ -69,7 +69,7 @@ jobs:
 
       # Rename APK
       - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Next\ Bus.apk
+        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next Bus.apk"
 
       # Verify APK Exists
       - name: Verify APK Path
@@ -108,6 +108,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/Next\ Bus.apk
-          asset_name: Next\ Bus.apk
+          asset_path: "build/app/outputs/flutter-apk/Next Bus.apk"
+          asset_name: "Next Bus.apk"    
           asset_content_type: application/vnd.android.package-archive
