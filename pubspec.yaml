@@ -40,7 +40,6 @@ dependencies:
   provider: ^6.1.2
   intl: ^0.20.1
   firebase_core: ^3.8.1
-  change_app_package_name: ^1.4.0
 
 dev_dependencies:
   flutter_test:

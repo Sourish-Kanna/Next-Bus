@@ -68,7 +68,7 @@ class BusHomePage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const NextTime(),
             const SizedBox(height: 20),
@@ -99,7 +99,7 @@ class BusHomePage extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context, MaterialPageRoute(builder: (context) =>
-                              const NewPage()), );
+                              const EntriesPage()), );
                           },
                         child: const Text(
                           "View Entries",
@@ -121,8 +121,8 @@ class BusHomePage extends StatelessWidget {
   }
 }
 
-class NewPage extends StatelessWidget {
-  const NewPage({super.key});
+class EntriesPage extends StatelessWidget {
+  const EntriesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +135,7 @@ class NewPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               "All Entries",
@@ -146,21 +146,35 @@ class NewPage extends StatelessWidget {
               ),
             ),
             const ListDisplay(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "Go Back",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.normal
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const AddTime(),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          "Go Back",
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.normal
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
