@@ -25,9 +25,10 @@ jobs:
       - name: Get Latest Git Tag
         id: get_tag
         run: |
-          TAG=$(git describe --tags --abbrev=0)
+          TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")  # Fallback if no tags are found
           echo "Latest tag: $TAG"
           echo "TAG=$TAG" >> $GITHUB_ENV
+
 
       # Increment the version
       - name: Increment Version
