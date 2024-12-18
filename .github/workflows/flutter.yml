@@ -1,0 +1,67 @@
+name: Flutter
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subhedar/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+
+      - run: flutter pub get
+
+      - name: Determine Next Version
+        uses: actions/version@v3
+        with:
+          major-version: 1
+          minor-version: 0
+          patch-version: 0
+
+      - name: Build the app
+        run: flutter build apk --release --version-name ${{ steps.determine-next-version.outputs.VERSION }} --version-code ${{ steps.determine-next-version.outputs.BUILD_VERSION }}
+
+      - name: Upload APK to GitHub Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/release/app-release.apk
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.determine-next-version.outputs.VERSION }}
+          release_name: Release v${{ steps.determine-next-version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+
+      # - name: Cache
+      #   uses: actions/cache@v4.2.0
+      #   with:
+      #     # A list of files, directories, and wildcard patterns to cache and restore
+      #     path: 
+      #     # An explicit key for restoring and saving the cache
+      #     key: 
+      #     # An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
+      #     restore-keys: # optional
+      #     # The chunk size used to split up large files during upload, in bytes
+      #     upload-chunk-size: # optional
+      #     # An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
+      #     enableCrossOsArchive: # optional, default is false
+      #     # Fail the workflow if cache entry is not found
+      #     fail-on-cache-miss: # optional, default is false
+      #     # Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
+      #     lookup-only: # optional, default is false
+      #     # Run the post step to save the cache even if another step before fails
+      #     save-always: # optional, default is false
+                
