@@ -1,24 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:next_bus/bus_timing_provider.dart';
+import 'package:nextbus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
+
+SnackBar addSnackBar(BuildContext context, String text, ) {
+  DateTime now = DateTime.now();
+  return SnackBar(
+    backgroundColor: Theme.of(context).colorScheme.
+    inverseSurface.withOpacity(0.95),
+    behavior: SnackBarBehavior.floating,
+    content: Text(text,
+      style: TextStyle(
+        fontSize: 16,
+        color: Theme.of(context).colorScheme.onInverseSurface,
+      ),
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30.0),
+    ),
+    action: text=="Time Added" ? SnackBarAction(
+      label: "Undo",
+      onPressed: () {
+        Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(now);
+      },
+    ) : null ,
+    duration: Duration(seconds: 3),
+  );
+}
+
 
 class NextTime extends StatelessWidget {
   const NextTime({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusTimingProvider>(
+    return Consumer<BusTimingList>(
         builder: (context, provider, child) {
 
           String getNextBus() {
             DateTime now = DateTime.now();
-            for (String time in provider.busTimings) {
-              String savedTime = "${DateFormat('yyyy-MM-dd').format(now)} $time";
-              DateTime busTime = DateFormat('yyyy-MM-dd h:mm a').parse(savedTime);
-              if (now.isBefore(busTime)) {
-                return time;
+            String formattedTime = DateFormat('h:mm a').format(now);
+            DateTime timeNew = DateFormat('h:mm a').parse(formattedTime);
+            for (DateTime time in provider.busTimings) {
+              if (timeNew.isBefore(time)) {
+                return dateToString(time);
               }
             }
             return "No more buses today";
@@ -56,7 +82,7 @@ class ListDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusTimingProvider>(
+    return Consumer<BusTimingList>(
       builder: (context, provider, child) {
         return Expanded(
           child: ListView.builder(
@@ -105,8 +131,7 @@ class ListDisplay extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            provider.busTimings[index],
-                            selectionColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                            dateToString(provider.busTimings[index]),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.normal,
@@ -126,8 +151,8 @@ class ListDisplay extends StatelessWidget {
     );
   }
 
-  void _editBusTiming(BuildContext context, int index, BusTimingProvider provider) {
-    TextEditingController timeController = TextEditingController(text: provider.busTimings[index]);
+  void _editBusTiming(BuildContext context, int index, BusTimingList provider) {
+    TextEditingController timeController = TextEditingController(text: dateToString(provider.busTimings[index]));
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -147,7 +172,7 @@ class ListDisplay extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               if (timeController.text.isNotEmpty) {
-                provider.editBusTiming(index, timeController.text);
+                provider.editBusTiming(index, stringToDate(timeController.text));
               }
               Navigator.pop(context);
             },
@@ -172,7 +197,10 @@ class AddTime extends StatelessWidget {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       onPressed: () {
-        Provider.of<BusTimingProvider>(context, listen: false).addBusTiming();
+        Provider.of<BusTimingList>(context, listen: false).addBusTiming();
+        ScaffoldMessenger.of(context).showSnackBar(
+          addSnackBar(context, "Time Added"),
+        );
       },
       child: const Text(
         "Add time",
@@ -183,4 +211,49 @@ class AddTime extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class ListHome extends StatelessWidget {
+  const ListHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<BusTimingList>(
+      builder: (context, provider, child) {
+        return Expanded(
+          child: ListView.builder(
+            itemCount: provider.busTimings.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          dateToString(provider.busTimings[index]),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
 }

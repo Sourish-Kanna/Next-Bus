@@ -1,4 +1,4 @@
-name: next_bus
+name: nextbus
 description: "An App to store bus timing and to show when next bus will come"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,6 +39,7 @@ dependencies:
   dynamic_color: ^1.7.0
   provider: ^6.1.2
   intl: ^0.20.1
+  firebase_core: ^3.8.1
 
 dev_dependencies:
   flutter_test:
@@ -49,7 +50,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
