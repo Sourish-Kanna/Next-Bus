@@ -1,0 +1,111 @@
+name: Flutter Release
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure all history is fetched
+    
+      # Ensure on the main branch before pulling
+      - name: Switch to Main Branch
+        run: |
+          git switch main || git checkout -b main origin/main 
+    
+      # Fetch all Git tags
+      - name: Fetch All Tags
+        run: git fetch --tags
+
+      # Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      # Set up Flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+
+      # Install dependencies
+      - run: flutter pub get
+
+      # Increment Version
+      - name: Increment Version
+        id: increment_version
+        run: |
+          TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "Latest Tag: $TAG"
+          VERSION_TAG=${TAG:1}  # Remove the 'v' prefix
+          VERSION_PARTS=(${VERSION_TAG//./ })
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          PATCH=$((PATCH + 1))
+
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          while git tag -l | grep -q "^$NEW_VERSION$"; do
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          done
+
+          echo "New Version: $NEW_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      # Build the app
+      - name: Build the app
+        run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
+
+      # Rename APK
+      - name: Rename APK
+        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next Bus.apk"
+
+      # Verify APK Exists
+      - name: Verify APK Path
+        run: ls -la build/app/outputs/flutter-apk/
+
+      # Push New Tag
+      - name: Push New Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}
+
+      # Create GitHub Release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          release_name: Release ${{ env.NEW_VERSION }}
+          draft: false
+          prerelease: false
+
+      # Verify Release Creation
+      - name: Verify Release
+        run: |
+          echo "Release created with tag: ${{ env.NEW_VERSION }}"
+          echo "Upload URL: ${{ steps.create_release.outputs.upload_url }}"
+
+      # Upload APK to Release
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "build/app/outputs/flutter-apk/Next Bus.apk"
+          asset_name: "Next Bus.apk"    
+          asset_content_type: application/vnd.android.package-archive
