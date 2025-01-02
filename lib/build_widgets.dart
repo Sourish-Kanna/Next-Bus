@@ -214,8 +214,53 @@ class AddTime extends StatelessWidget {
 }
 
 
-class ListHome extends StatelessWidget {
-  const ListHome({super.key});
+class ListHomePast extends StatelessWidget {
+  const ListHomePast({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<BusTimingList>(
+      builder: (context, provider, child) {
+        return Expanded(
+          child: ListView.builder(
+            itemCount: provider.busTimings.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          dateToString(provider.busTimings[index]),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+}
+
+
+class ListHomeNext extends StatelessWidget {
+  const ListHomeNext({super.key});
 
   @override
   Widget build(BuildContext context) {

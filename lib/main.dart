@@ -7,6 +7,10 @@ import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+var routes = {
+  '/': (context) => const BusHomePage(),
+  '/entries': (context) => const EntriesPage(),
+};
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,25 +33,23 @@ class BusTimingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
-      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        ColorScheme lightColorScheme;
-        ColorScheme darkColorScheme;
-
-        if (lightDynamic != null && darkDynamic != null) {
-          lightColorScheme = lightDynamic.harmonized();
-          darkColorScheme = darkDynamic.harmonized();
-        } else {
-          // Fallback to default Material 3 color schemes
-          lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
-          darkColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark);
-        }
+      builder: (lightDynamic, darkDynamic) {
+        final lightScheme = lightDynamic?.harmonized() ??
+            ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+        final darkScheme = darkDynamic?.harmonized() ??
+            ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            );
 
         return MaterialApp(
           title: 'Next Bus',
-          theme: ThemeData(colorScheme: lightColorScheme, useMaterial3: true),
-          darkTheme: ThemeData(colorScheme: darkColorScheme, useMaterial3: true),
-          themeMode: ThemeMode.system, // Follows system theme
-          home: const BusHomePage(),
+          theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
+          darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
+          themeMode: ThemeMode.system,
+          // home: const BusHomePage(),
+          initialRoute: '/',
+          routes: routes,
         );
       },
     );
@@ -69,20 +71,33 @@ class BusHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
+
           children: [
             const NextTime(),
-            const SizedBox(height: 20),
-            // Bus Timing List Section
+            const SizedBox(height: 5),
+
             Text(
-              "All Timings:",
+              "Past Timings:",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            ListHome(),
+            ListHomePast(),
             const SizedBox(height: 5),
+
+            Text(
+              "Next Timings:",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            ListHomeNext(),
+            const SizedBox(height: 5),
+
             Row(
               children: [
                 Expanded(
@@ -96,11 +111,7 @@ class BusHomePage extends StatelessWidget {
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context, MaterialPageRoute(builder: (context) =>
-                              const EntriesPage()), );
-                          },
+                        onPressed: () =>  Navigator.pushNamed(context, '/entries'),
                         child: const Text(
                           "View Entries",
                           style: TextStyle(
@@ -129,7 +140,7 @@ class EntriesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Next Bus'),
+        // title: const Text('Next Bus'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
@@ -147,6 +158,7 @@ class EntriesPage extends StatelessWidget {
             ),
             const ListDisplay(),
             const SizedBox(height: 5),
+
             Row(
               children: [
                 Expanded(
