@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:nextbus/build_ui.dart';
+import 'package:nextbus/build_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
