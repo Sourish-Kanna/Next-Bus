@@ -3,6 +3,7 @@ name: Flutter Release
 on:
   push:
     branches: [ "main" ]
+  pull
 
 jobs:
   build:
@@ -43,7 +44,7 @@ jobs:
       - name: Increment Version
         id: increment_version
         run: |
-          TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
           echo "Latest Tag: $TAG"
           VERSION_TAG=${TAG:1}  # Remove the 'v' prefix
           VERSION_PARTS=(${VERSION_TAG//./ })
@@ -51,6 +52,14 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
           PATCH=$((PATCH + 1))
+          
+          if [ "$MAJOR" -eq 0 ]; then
+              MAJOR=1
+              MINOR=0
+              PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
 
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           while git tag -l | grep -q "^$NEW_VERSION$"; do
