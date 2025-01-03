@@ -52,7 +52,6 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          // home: const BusHomePage(),
           initialRoute: '/',
           routes: routes,
         );
@@ -63,11 +62,6 @@ class BusTimingApp extends StatelessWidget {
 
 class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
-
-  void addroute() {
-    var test = FirestoreService();
-    test.addRoute("56",["Thane Station","Tiku-Jini-Wadi"],["08:50","12:50"]);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +80,6 @@ class BusHomePage extends StatelessWidget {
             const NextTime(),
             const SizedBox(height: 5),
 
-
-
             Expanded(
               child: Row(
                 children: [
@@ -104,7 +96,8 @@ class BusHomePage extends StatelessWidget {
                         ),
                         ListHomePast(),
                       ],
-                    ),),
+                    ),
+                  ),
                   const SizedBox(width: 5),
                   Expanded(
                     child: Column(
@@ -119,68 +112,29 @@ class BusHomePage extends StatelessWidget {
                         ),
                         ListHomeNext(),
                       ],
-                    ),),
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 5),
 
-
-            // Text(
-            //   "Past Timings:",
-            //   style: TextStyle(
-            //     fontSize: 24,
-            //     fontWeight: FontWeight.bold,
-            //     color: Theme.of(context).colorScheme.primary,
-            //   ),
-            // ),
-            // ListHomePast(),
-            //
-
-            // Text(
-            //   "Next Timings:",
-            //   style: TextStyle(
-            //     fontSize: 24,
-            //     fontWeight: FontWeight.bold,
-            //     color: Theme.of(context).colorScheme.primary,
-            //   ),
-            // ),
-            // ListHomeNext(),
-            // const SizedBox(height: 5),
-
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const AddTime(),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        onPressed: () =>  Navigator.pushNamed(context, '/entries'),
-                        child: const Text(
-                          "View Entries",
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.normal
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: () =>  Navigator.pushNamed(context, '/entries'),
+              child: const Text(
+                "View Entries",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.normal
                 ),
-              ],
-            )
+              ),
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addroute,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

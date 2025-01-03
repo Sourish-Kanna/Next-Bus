@@ -4,24 +4,26 @@ class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
 
   factory FirestoreService() {
-    return _instance; // Return the same instance every time
+    return _instance;
   }
 
-  FirestoreService._internal(); // Private constructor to prevent direct instantiation
+  FirestoreService._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Add a new route to Firestore and update the related stops.
-  Future<void> addRoute(String routeName, List<String> stops, List<String> timings) async {
+  Future<void> addRoute(String routeName, List<String> stops,
+      List<String> timings) async {
     try {
-      // Add route to busRoutes collection
       await _firestore.collection('busRoutes').doc(routeName).set({
         'routeName': routeName,
         'stops': stops,
         'timings': timings,
-        'clusteredTimings': [], // Initial empty clustered timings
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+        'clusteredTimings': [],
+        'Last Updated': FieldValue.serverTimestamp(),
+      },
+      SetOptions()
+      );
 
       // Update each stop to include this route
       for (String stop in stops) {
@@ -158,7 +160,7 @@ class FirestoreService {
           .collection('busTimings')
           .get();
 
-      return busTimingsSnapshot.docs.map((doc) => doc.data()!).toList();
+      return busTimingsSnapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
       print("Error fetching bus timings: $e");
       return [];
