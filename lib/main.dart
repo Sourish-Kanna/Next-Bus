@@ -75,7 +75,6 @@ class BusHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-
           children: [
             const NextTime(),
             const SizedBox(height: 5),
