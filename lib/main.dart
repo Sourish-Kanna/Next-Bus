@@ -5,7 +5,8 @@ import 'package:nextbus/build_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:nextbus/firebase_options.dart';
+import 'package:nextbus/firebase_operations.dart';
 
 var routes = {
   '/': (context) => const BusHomePage(),
@@ -58,6 +59,11 @@ class BusTimingApp extends StatelessWidget {
 
 class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
+
+  void addroute() {
+    var test = FirestoreService();
+    test.addRoute("56",["Thane Station","Tiku-Jini-Wadi"],["08:50","12:50"]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +133,11 @@ class BusHomePage extends StatelessWidget {
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: addroute,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
       ),
     );
   }
