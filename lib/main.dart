@@ -19,9 +19,13 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
   runApp(ChangeNotifierProvider(
     create: (context) => BusTimingList(),
     child: const BusTimingApp(),
@@ -82,27 +86,66 @@ class BusHomePage extends StatelessWidget {
             const NextTime(),
             const SizedBox(height: 5),
 
-            Text(
-              "Past Timings:",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            ListHomePast(),
-            const SizedBox(height: 5),
 
-            Text(
-              "Next Timings:",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Past",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        ListHomePast(),
+                      ],
+                    ),),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Next",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        ListHomeNext(),
+                      ],
+                    ),),
+                ],
               ),
             ),
-            ListHomeNext(),
-            const SizedBox(height: 5),
+
+
+            // Text(
+            //   "Past Timings:",
+            //   style: TextStyle(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //     color: Theme.of(context).colorScheme.primary,
+            //   ),
+            // ),
+            // ListHomePast(),
+            //
+
+            // Text(
+            //   "Next Timings:",
+            //   style: TextStyle(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //     color: Theme.of(context).colorScheme.primary,
+            //   ),
+            // ),
+            // ListHomeNext(),
+            // const SizedBox(height: 5),
 
             Row(
               children: [
