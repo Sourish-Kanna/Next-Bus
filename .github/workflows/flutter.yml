@@ -71,13 +71,23 @@ jobs:
           echo "New Version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      # Generate release notes from commit messages
+      - name: Generate Release Notes
+        id: generate_release_notes
+        run: |
+          echo "# Release Notes for ${{ env.NEW_VERSION }}" > release_notes.md
+          echo "" >> release_notes.md
+          git log --oneline --no-merges ${{ github.event.pull_request.base.sha }}..HEAD | while read line; do
+            echo "- $line" >> release_notes.md
+          done
+
       # Build the app
       - name: Build the app
         run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
 
       # Rename APK
       - name: Rename APK
-        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next Bus.apk"
+        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk"
 
       # Verify APK Exists
       - name: Verify APK Path
@@ -118,6 +128,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "build/app/outputs/flutter-apk/Next Bus.apk"
-          asset_name: "Next Bus.apk"    
+          asset_path: "build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk"
+          asset_name: "Next-Bus-${{ env.NEW_VERSION }}.apk"
           asset_content_type: application/vnd.android.package-archive
