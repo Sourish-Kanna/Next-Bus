@@ -3,7 +3,8 @@ name: Flutter Release
 on:
   push:
     branches: [ "main" ]
-  pull
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
