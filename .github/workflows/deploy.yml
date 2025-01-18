@@ -3,9 +3,9 @@ name: GitHub Page Deploy
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+#  pull_request:
+#    branches: [ "main" ]
+#  workflow_dispatch:
 
 jobs:
   build:
@@ -39,7 +39,7 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages  # The branch you want to deploy to (default is gh-pages)
+          branch: gh-pages
           folder: build/web  # The folder containing the web app (flutter build web)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
