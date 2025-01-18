@@ -197,7 +197,8 @@ class AddTime extends StatelessWidget {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       onPressed: () {
-        Provider.of<BusTimingList>(context, listen: false).addBusTiming();
+        Provider.of<BusTimingList>(context, listen: false)
+            .addBusTiming("56", "Add Button");
         ScaffoldMessenger.of(context).showSnackBar(
           addSnackBar(context, "Time Added"),
         );

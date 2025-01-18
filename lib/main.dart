@@ -67,19 +67,34 @@ class BusHomePage extends StatelessWidget {
     var test = FirestoreService();
     List<String> timeList = [
       "08:00 AM", "08:15 AM", "09:00 AM", "10:15 AM", "10:30 AM", "11:10 AM",
-      "11:20 AM", "11:30 AM", "11:45 AM", "12:05 PM", "12:20 PM", "12:45 PM",
-      "12:50 PM", "12:55 PM", "01:15 PM", "01:30 PM", "01:40 PM", "01:45 PM",
-      "01:50 PM", "01:55 PM", "02:00 PM", "02:05 PM", "02:15 PM", "02:30 PM",
-      "02:50 PM", "03:20 PM", "03:25 PM", "03:35 PM", "03:45 PM", "03:50 PM",
-      "03:55 PM", "04:00 PM", "04:10 PM", "04:15 PM", "04:20 PM", "04:25 PM",
-      "04:30 PM", "04:40 PM", "04:45 PM", "04:55 PM", "05:00 PM", "05:05 PM",
-      "05:10 PM", "05:15 PM", "05:20 PM", "05:25 PM", "05:20 PM", "05:30 PM",
-      "05:40 PM", "05:45 PM", "06:00 PM", "06:05 PM", "06:25 PM", "06:45 PM",
-      "07:00 PM", "07:10 PM", "07:30 PM", "07:45 PM", "08:00 PM", "08:10 PM",
+      // "11:20 AM", "11:30 AM", "11:45 AM", "12:05 PM", "12:20 PM", "12:45 PM",
+      // "12:50 PM", "12:55 PM", "01:15 PM", "01:30 PM", "01:40 PM", "01:45 PM",
+      // "01:50 PM", "01:55 PM", "02:00 PM", "02:05 PM", "02:15 PM", "02:30 PM",
+      // "02:50 PM", "03:20 PM", "03:25 PM", "03:35 PM", "03:45 PM", "03:50 PM",
+      // "03:55 PM", "04:00 PM", "04:10 PM", "04:15 PM", "04:20 PM", "04:25 PM",
+      // "04:30 PM", "04:40 PM", "04:45 PM", "04:55 PM", "05:00 PM", "05:05 PM",
+      // "05:10 PM", "05:15 PM", "05:20 PM", "05:25 PM", "05:20 PM", "05:30 PM",
+      // "05:40 PM", "05:45 PM", "06:00 PM", "06:05 PM", "06:25 PM", "06:45 PM",
+      // "07:00 PM", "07:10 PM", "07:30 PM", "07:45 PM", "08:00 PM", "08:10 PM",
       "09:20 PM", "09:40 PM", "10:05 PM"
     ];
 
-    test.addRoute("56", ["tes1","test 2"], timeList);
+    test.addRoute("56", ["test 1","test 2"], timeList,"test add");
+  }
+
+  void removeRoute() {
+    var test = FirestoreService();
+    test.removeRoute("56");
+  }
+
+  void addBusTiming() {
+    var test = FirestoreService();
+    test.addBusTiming("56", "07:43 PM", "test add button ");
+  }
+
+  Future<void> getBusTimings() async {
+    var test = FirestoreService();
+    print(await test.getBusTimings("56"));
   }
 
   @override
@@ -155,7 +170,10 @@ class BusHomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: addroute,
+        // onPressed: addroute,
+        // onPressed: removeRoute,
+        // onPressed: addBusTiming,
+        onPressed: getBusTimings,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

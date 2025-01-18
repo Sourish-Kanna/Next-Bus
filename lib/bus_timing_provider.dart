@@ -12,6 +12,9 @@ String dateToString(DateTime time){
 }
 
 class BusTimingList with ChangeNotifier {
+
+  var FirebaseService = FirestoreService();
+
   final List<DateTime> _busTimings = [
     DateFormat('hh:mm a').parse("08:00 AM"), DateFormat('hh:mm a').parse("08:15 AM"),
     DateFormat('hh:mm a').parse("09:00 AM"), DateFormat('hh:mm a').parse("10:15 AM"),
@@ -48,12 +51,13 @@ class BusTimingList with ChangeNotifier {
   ];
   List<DateTime> get busTimings => _busTimings;
 
-  void addBusTiming() {
+  void addBusTiming(String route, String user) {
     DateTime now = DateTime.now();
     String formattedTime = DateFormat('h:mm a').format(now);
     DateTime time = DateFormat('h:mm a').parse(formattedTime);
     _busTimings.add(time);
     _busTimings.sort();
+    FirebaseService.addBusTiming(route, formattedTime, user);
     notifyListeners();
   }
 
