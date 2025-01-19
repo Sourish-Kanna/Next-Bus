@@ -144,8 +144,11 @@ class BusHomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        // onPressed: addroute,
+        // onPressed: removeRoute,
         onPressed: addBusTiming,
-        tooltip: 'Add Bus Timing',
+        // onPressed: getBusTimings,
+        tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
     );
