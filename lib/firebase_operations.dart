@@ -15,58 +15,37 @@ class FirestoreService {
   /// Add a new route to Firestore and update related stops.
   Future<void> addRoute(String routeName, List<String> stops, List<String> timings, String addedBy) async {
     try {
-      // Convert timings into a list of maps with time and addedBy.
       List<Map<String, String>> timingObjects = timings
-          .map((time) => {
-        'time': time,
-        'addedBy': addedBy,
-      })
+          .map((time) => {'time': time, 'addedBy': addedBy})
           .toList();
 
-      // Extract times for clustering.
-      List<String> timesOnly = timings;
+      List<String> clusteredTimings = TimeBasedClustering().getClusterMeans(timings);
 
-      // Calculate clustered timings.
-      List<String> clusteredTimings = TimeBasedClustering().getClusterMeans(timesOnly);
-
-      // Add the route document to Firestore.
       await _firestore.collection('busRoutes').doc(routeName).set({
         'routeName': routeName,
         'stops': stops,
-        'timings': timingObjects, // Store as a list of maps
+        'timings': timingObjects,
         'clusteredTimings': clusteredTimings,
-        'Last Updated': FieldValue.serverTimestamp(),
+        'lastUpdated': FieldValue.serverTimestamp(),
       });
 
-      // Update each stop to include this route.
       for (String stop in stops) {
         final stopRef = _firestore.collection('busStops').doc(stop);
-
-        // Check if the stop document exists, create it if not.
         final stopDoc = await stopRef.get();
         if (!stopDoc.exists) {
-          await stopRef.set({
-            'stopName': stop,
-            'routes': [routeName],
-          });
+          await stopRef.set({'stopName': stop, 'routes': [routeName]});
         } else {
-          // Add routeName to the existing routes array.
-          await stopRef.update({
-            'routes': FieldValue.arrayUnion([routeName]),
-          });
+          await stopRef.update({'routes': FieldValue.arrayUnion([routeName])});
         }
       }
-
-      print("Route added successfully!");
     } catch (e) {
       print("Error adding route: $e");
     }
   }
 
-  /// Remove a route from Firestore and update the related stops.
+  /// Remove a route from Firestore and update related stops.
   Future<void> removeRoute(String routeName) async {
     try {
-      // Get the route document to retrieve the associated stops
       final routeDoc = await _firestore.collection('busRoutes').doc(routeName).get();
       if (!routeDoc.exists) {
         print("Route not found!");
@@ -74,16 +53,13 @@ class FirestoreService {
       }
 
       List<String> stops = List<String>.from(routeDoc.data()?['stops'] ?? []);
-      // Remove the route from the busRoutes collection
       await _firestore.collection('busRoutes').doc(routeName).delete();
 
-      // Remove the routeName from each stop's 'routes' array
       for (String stop in stops) {
         await _firestore.collection('busStops').doc(stop).update({
           'routes': FieldValue.arrayRemove([routeName]),
         });
       }
-      print("Route removed successfully!");
     } catch (e) {
       print("Error removing route: $e");
     }
@@ -92,24 +68,86 @@ class FirestoreService {
   /// Add a new bus timing to a specific route and update clustered timings.
   Future<void> addBusTiming(String routeName, String time, String addedBy) async {
     try {
-      // Get the route document
       final routeRef = _firestore.collection('busRoutes').doc(routeName);
       final routeDoc = await routeRef.get();
 
       if (!routeDoc.exists) {
-        print("Error: Route does not exist.");
+        print("Route not found!");
         return;
       }
 
-      // Get the existing timings (list of maps)
       List<Map<String, String>> timings = List<Map<String, String>>.from(
           routeDoc.data()?['timings']?.map((e) => Map<String, String>.from(e)) ?? []);
 
-      // Add the new timing with the addedBy field
-      timings.add({
-        'time': time,
-        'addedBy': addedBy,
+      timings.add({'time': time, 'addedBy': addedBy});
+      List<String> timesOnly = timings.map((entry) => entry['time']!).toList();
+      List<String> clusteredTimings = TimeBasedClustering().getClusterMeans(timesOnly);
+
+      await routeRef.update({
+        'timings': timings,
+        'clusteredTimings': clusteredTimings,
+        'lastUpdated': FieldValue.serverTimestamp(),
       });
+    } catch (e) {
+      print("Error adding bus timing: $e");
+    }
+  }
+
+  /// Delete a bus timing from a specific route.
+  Future<void> deleteBusTiming(String routeName, String time, String updatedBy) async {
+    try {
+      final routeRef = _firestore.collection('busRoutes').doc(routeName);
+      final routeDoc = await routeRef.get();
+
+      if (!routeDoc.exists) {
+        print("Route not found!");
+        return;
+      }
+
+      List<Map<String, String>> timings = List<Map<String, String>>.from(
+          routeDoc.data()?['timings']?.map((e) => Map<String, String>.from(e)) ?? []);
+
+      timings.removeWhere((entry) => entry['time'] == time);
+      List<String> timesOnly = timings.map((entry) => entry['time']!).toList();
+      List<String> clusteredTimings = TimeBasedClustering().getClusterMeans(timesOnly);
+
+      await routeRef.update({
+        'timings': timings,
+        'clusteredTimings': clusteredTimings,
+        'lastUpdated': FieldValue.serverTimestamp(),
+
+      });
+    } catch (e) {
+      print("Error deleting bus timing: $e");
+    }
+  }
+
+  /// Update a bus timing in a specific route.
+  Future<void> updateBusTiming(String routeName, String oldTime, String newTime, String updatedBy) async {
+    try {
+      final routeRef = _firestore.collection('busRoutes').doc(routeName);
+      final routeDoc = await routeRef.get();
+
+      if (!routeDoc.exists) {
+        print("Route not found!");
+        return;
+      }
+
+      // Fetch the existing timings
+      List<Map<String, String>> timings = List<Map<String, String>>.from(
+          routeDoc.data()?['timings']?.map((e) => Map<String, String>.from(e)) ?? []);
+
+      // Find the index of the old timing
+      int index = timings.indexWhere((timing) => timing['time'] == oldTime);
+
+      if (index == -1) {
+        print("Old timing not found!");
+        return;
+      }
+
+      // Update the old timing with the new time
+      timings[index]['time'] = newTime;
+      timings[index]['addedBy'] = updatedBy;
 
       // Extract times for clustering
       List<String> timesOnly = timings.map((entry) => entry['time']!).toList();
@@ -117,49 +155,57 @@ class FirestoreService {
       // Recalculate clustered timings
       List<String> clusteredTimings = TimeBasedClustering().getClusterMeans(timesOnly);
 
-      // Update the route document with the new timings and clustered timings
+      // Update the route document in Firestore
       await routeRef.update({
         'timings': timings,
         'clusteredTimings': clusteredTimings,
         'Last Updated': FieldValue.serverTimestamp(),
       });
 
-      print("Bus timing added successfully!");
+      print("Bus timing updated successfully!");
     } catch (e) {
-      print("Error adding bus timing: $e");
+      print("Error updating bus timing: $e");
     }
   }
 
   /// Update clustered timings for a specific route.
   Future<void> updateClusteredTimings(String routeName, List<String> clusteredTimings) async {
     try {
-      // Update the route document
       await _firestore.collection('busRoutes').doc(routeName).update({
         'clusteredTimings': clusteredTimings,
+        'lastUpdated': FieldValue.serverTimestamp(),
       });
-      print("Clustered timings updated for $routeName");
     } catch (e) {
       print("Error updating clustered timings: $e");
     }
   }
 
-  /// Get all routes passing through a specific stop.
-  Future<List<Map<String, dynamic>>> getRoutesByStop(String stopName) async {
+  /// Get all bus timings for a specific route.
+  Future<List<String>> getBusTimings(String routeName) async {
     try {
-      // Get the stop document
-      final stopDoc = await _firestore.collection('busStops').doc(stopName).get();
-      if (!stopDoc.exists) {
-        print("Stop not found!");
+      final routeDoc = await _firestore.collection('busRoutes').doc(routeName).get();
+      if (!routeDoc.exists) {
+        print("Route not found!");
         return [];
       }
 
-      // Get route IDs from the stop document
+      List<dynamic> timings = routeDoc.data()?['timings'] ?? [];
+      return timings.map((entry) => (entry as Map<String, dynamic>)['time'] as String).toList();
+    } catch (e) {
+      print("Error fetching bus timings: $e");
+      return [];
+    }
+  }
+
+  /// Get routes passing through a stop.
+  Future<List<Map<String, dynamic>>> getRoutesByStop(String stopName) async {
+    try {
+      final stopDoc = await _firestore.collection('busStops').doc(stopName).get();
+      if (!stopDoc.exists) return [];
       List<String> routeIds = List<String>.from(stopDoc.data()?['routes'] ?? []);
-
-      // Fetch the route details from busRoutes collection
-      final routeDocs = await Future.wait(routeIds.map((id) =>
-          _firestore.collection('busRoutes').doc(id).get()));
-
+      final routeDocs = await Future.wait(
+        routeIds.map((id) => _firestore.collection('busRoutes').doc(id).get()),
+      );
       return routeDocs.map((doc) => doc.data()!).toList();
     } catch (e) {
       print("Error fetching routes by stop: $e");
@@ -167,49 +213,18 @@ class FirestoreService {
     }
   }
 
-  /// Get all stops for a specific route.
+  /// Get stops for a route.
   Future<List<Map<String, dynamic>>> getStopsByRoute(String routeName) async {
     try {
-      // Get the route document
       final routeDoc = await _firestore.collection('busRoutes').doc(routeName).get();
-      if (!routeDoc.exists) {
-        print("Route not found!");
-        return [];
-      }
-
-      // Get stop names from the route document
+      if (!routeDoc.exists) return [];
       List<String> stopNames = List<String>.from(routeDoc.data()?['stops'] ?? []);
-
-      // Fetch the stop details from busStops collection
-      final stopDocs = await Future.wait(stopNames.map((name) =>
-          _firestore.collection('busStops').doc(name).get()));
-
+      final stopDocs = await Future.wait(
+        stopNames.map((name) => _firestore.collection('busStops').doc(name).get()),
+      );
       return stopDocs.map((doc) => doc.data()!).toList();
     } catch (e) {
       print("Error fetching stops by route: $e");
-      return [];
-    }
-  }
-
-  /// Get all bus timings for a specific route as a list of strings.
-  Future<List<String>> getBusTimings(String routeName) async {
-    try {
-      // Fetch the route document.
-      final routeSnapshot = await _firestore.collection('busRoutes').doc(routeName).get();
-
-      // Check if the document exists.
-      if (routeSnapshot.exists) {
-        // Extract the timings field, which is a list of maps.
-        final List<dynamic> timings = routeSnapshot.data()?['timings'] ?? [];
-
-        // Map the list of maps to a list of timing strings.
-        return timings.map((timing) => timing['time'] as String).toList();
-      } else {
-        print("Route not found: $routeName");
-        return [];
-      }
-    } catch (e) {
-      print("Error fetching bus timings: $e");
       return [];
     }
   }
