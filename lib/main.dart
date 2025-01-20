@@ -39,7 +39,7 @@ void main() async {
   // Start the app
   runApp(
     ChangeNotifierProvider(
-      create: (context) => BusTimingList("56"),
+      create: (context) => BusTimingList(route),
       child: const BusTimingApp(),
     ),
   );
@@ -76,37 +76,60 @@ class BusTimingApp extends StatelessWidget {
 class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
 
-  // Firebase operations for testing
-  void addRoute() {
-    var firestoreService = FirestoreService();
-    List<String> timeList = [
-      "08:00 AM", "08:15 AM", "09:00 AM", "10:15 AM", "10:30 AM", "11:10 AM",
-      "09:20 PM", "09:40 PM", "10:05 PM"
-    ];
-    firestoreService.addRoute(
-      "56",
-      ["Route 1", "Route 2"],
-      timeList,
-      "Route description",
-    );
-  }
-
-  void removeRoute() {
-    var firestoreService = FirestoreService();
-    firestoreService.removeRoute("56");
-  }
-
-  void addBusTiming() {
-    var firestoreService = FirestoreService();
-    firestoreService.addBusTiming("56", "07:43 PM", "Added via FAB");
-  }
-
-  Future<void> getBusTimings() async {
-    var firestoreService = FirestoreService();
-    print(await firestoreService.getBusTimings("56"));
-  }
-
   void _showAdminOptionsDialog(BuildContext context) {
+
+    void addRoute() {
+      var firestoreService = FirestoreService();
+      List<String> timeList = [ "07:45 AM",
+        "08:00 AM", "08:15 AM", "09:00 AM", "10:15 AM", "10:30 AM", "11:10 AM",
+        "11:20 AM", "11:30 AM", "11:45 AM", "12:05 PM", "12:20 PM", "12:45 PM",
+        "12:50 PM", "12:55 PM", "01:15 PM", "01:30 PM", "01:40 PM", "01:45 PM",
+        "01:50 PM", "01:55 PM", "02:00 PM", "02:05 PM", "02:15 PM", "02:30 PM",
+        "02:50 PM", "03:20 PM", "03:25 PM", "03:35 PM", "03:45 PM", "03:50 PM",
+        "03:55 PM", "04:00 PM", "04:10 PM", "04:15 PM", "04:20 PM", "04:25 PM",
+        "04:30 PM", "04:40 PM", "04:45 PM", "04:55 PM", "05:00 PM", "05:05 PM",
+        "05:10 PM", "05:15 PM", "05:20 PM", "05:25 PM", "05:20 PM", "05:30 PM",
+        "05:40 PM", "05:45 PM", "06:00 PM", "06:05 PM", "06:25 PM", "06:45 PM",
+        "07:00 PM", "07:10 PM", "07:30 PM", "07:45 PM", "08:00 PM", "08:10 PM",
+        "09:20 PM", "09:40 PM", "10:05 PM"
+      ];
+      firestoreService.addRoute(
+        route,
+        ["Route 1", "Route 2"],
+        timeList,
+        "$user Route description",
+      );
+      // showAlertDialog(context);
+      allSnackBar(context, "Route Added", onUndo: null);
+      provideHapticFeedback();
+
+    }
+
+    void removeRoute() {
+      var firestoreService = FirestoreService();
+      firestoreService.removeRoute(route);
+      allSnackBar(context, "Route Deleted", onUndo: null);
+      provideHapticFeedback();
+    }
+
+    void addBusTiming() {
+      var firestoreService = FirestoreService();
+      String formattedTime = dateToString(DateTime.now());
+      firestoreService.addBusTiming(route, formattedTime, "$user Added via FAB");
+      allSnackBar(context, "Time Added",
+        onUndo: () {
+          String now = dateToString(DateTime.now());
+          Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(route, now, user);
+        },
+      );
+      provideHapticFeedback();
+    }
+
+    Future<void> getBusTimings() async {
+      var firestoreService = FirestoreService();
+      print(await firestoreService.getBusTimings(route));
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -119,32 +142,33 @@ class BusHomePage extends StatelessWidget {
                 leading: const Icon(Icons.directions_bus),
                 title: const Text("Add Route"),
                 onTap: () {
-                  Navigator.pop(context); // Close the dialog
+                  // Navigator.pop(context);
                   addRoute(); // Call your function to add a route
+                  Navigator.pop(context); // Close the dialog
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.access_time),
                 title: const Text("Add Bus Timing"),
                 onTap: () {
-                  Navigator.pop(context); // Close the dialog
                   addBusTiming(); // Call your function to add a bus timing
+                  Navigator.pop(context); // Close the dialog
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text("Remove Route"),
                 onTap: () {
-                  Navigator.pop(context); // Close the dialog
                   removeRoute(); // Call your function to remove a route
+                  Navigator.pop(context); // Close the dialog
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.search),
                 title: const Text("View Timings"),
                 onTap: () {
-                  Navigator.pop(context); // Close the dialog
                   getBusTimings(); // Call your function to get bus timings
+                  Navigator.pop(context); // Close the dialog
                 },
               ),
             ],

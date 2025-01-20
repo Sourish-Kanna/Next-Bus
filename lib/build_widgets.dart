@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
@@ -6,29 +7,36 @@ import 'package:provider/provider.dart';
 var route = "56";
 var user = "test";
 
+void provideHapticFeedback() {
+  HapticFeedback.lightImpact();
+}
+
 // SnackBar widget
-SnackBar addSnackBar(BuildContext context, String text, {VoidCallback? onUndo}) {
-  return SnackBar(
-    backgroundColor: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.95),
-    behavior: SnackBarBehavior.floating,
-    content: Text(
-      text,
-      style: TextStyle(
-        fontSize: 16,
-        color: Theme.of(context).colorScheme.onInverseSurface,
-      ),
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30.0),
-    ),
-    action: onUndo != null
-        ? SnackBarAction(
-      label: "Undo",
-      onPressed: onUndo,
-    )
-        : null,
-    duration: const Duration(seconds: 3),
+void allSnackBar(BuildContext context, String text, {VoidCallback? onUndo}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.95),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.onInverseSurface,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        action: onUndo != null
+            ? SnackBarAction(
+          label: "Undo",
+          onPressed: onUndo,
+        )
+            : null,
+        duration: const Duration(seconds: 3),
+      )
   );
+  provideHapticFeedback();
 }
 
 // NextTime widget
@@ -167,9 +175,7 @@ class ListDisplay extends StatelessWidget {
                 provider.editBusTiming(route, index, newTime, user);
                 Navigator.pop(context);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  addSnackBar(context, "Invalid time format"),
-                );
+                allSnackBar(context, "Invalid time format",onUndo: null);
               }
             },
             child: const Text("Save"),
@@ -193,15 +199,13 @@ class AddTime extends StatelessWidget {
       ),
       onPressed: () {
         Provider.of<BusTimingList>(context, listen: false).addBusTiming(route, "${user}Add Button");
-        ScaffoldMessenger.of(context).showSnackBar(
-          addSnackBar(
-            context,
-            "Time Added",
-            onUndo: () {
-              String now = dateToString(DateTime.now());
-              Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(route, now, user);
-            },
-          ),
+        allSnackBar(
+          context,
+          "Time Added",
+          onUndo: () {
+            String now = dateToString(DateTime.now());
+            Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(route, now, user);
+          },
         );
       },
       child: const Text(
