@@ -3,6 +3,9 @@ name: Flutter Release
 on:
   push:
     branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+#  workflow_dispatch:
 
 jobs:
   build:
@@ -43,7 +46,7 @@ jobs:
       - name: Increment Version
         id: increment_version
         run: |
-          TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
           echo "Latest Tag: $TAG"
           VERSION_TAG=${TAG:1}  # Remove the 'v' prefix
           VERSION_PARTS=(${VERSION_TAG//./ })
@@ -51,6 +54,14 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
           PATCH=$((PATCH + 1))
+          
+          if [ "$MAJOR" -eq 0 ]; then
+              MAJOR=1
+              MINOR=0
+              PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
 
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           while git tag -l | grep -q "^$NEW_VERSION$"; do
@@ -61,13 +72,23 @@ jobs:
           echo "New Version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      # Generate release notes from commit messages
+      - name: Generate Release Notes
+        id: generate_release_notes
+        run: |
+          echo "# Release Notes for ${{ env.NEW_VERSION }}" > release_notes.md
+          echo "" >> release_notes.md
+          git log --oneline --no-merges ${{ github.event.pull_request.base.sha }}..HEAD | while read line; do
+            echo "- $line" >> release_notes.md
+          done
+
       # Build the app
       - name: Build the app
         run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
 
       # Rename APK
       - name: Rename APK
-        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next Bus.apk"
+        run: mv "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk"
 
       # Verify APK Exists
       - name: Verify APK Path
@@ -90,8 +111,10 @@ jobs:
         with:
           tag_name: ${{ env.NEW_VERSION }}
           release_name: Release ${{ env.NEW_VERSION }}
-          draft: false
+          body_path: release_notes.md
+          draft: true
           prerelease: false
+
 
       # Verify Release Creation
       - name: Verify Release
@@ -106,6 +129,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "build/app/outputs/flutter-apk/Next Bus.apk"
-          asset_name: "Next Bus.apk"    
+          asset_path: "build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk"
+          asset_name: "Next-Bus-${{ env.NEW_VERSION }}.apk"
           asset_content_type: application/vnd.android.package-archive
