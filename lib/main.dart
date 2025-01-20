@@ -14,6 +14,10 @@ final Map<String, WidgetBuilder> routes = {
   '/entries': (context) => const EntriesPage(),
 };
 
+final bool isAdmin = true;
+String route = "56";
+String user = "test";
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -35,7 +39,7 @@ void main() async {
   // Start the app
   runApp(
     ChangeNotifierProvider(
-      create: (context) => BusTimingList(),
+      create: (context) => BusTimingList("56"),
       child: const BusTimingApp(),
     ),
   );
@@ -102,6 +106,62 @@ class BusHomePage extends StatelessWidget {
     print(await firestoreService.getBusTimings("56"));
   }
 
+  void _showAdminOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Admin Options"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.directions_bus),
+                title: const Text("Add Route"),
+                onTap: () {
+                  Navigator.pop(context); // Close the dialog
+                  addRoute(); // Call your function to add a route
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text("Add Bus Timing"),
+                onTap: () {
+                  Navigator.pop(context); // Close the dialog
+                  addBusTiming(); // Call your function to add a bus timing
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text("Remove Route"),
+                onTap: () {
+                  Navigator.pop(context); // Close the dialog
+                  removeRoute(); // Call your function to remove a route
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: const Text("View Timings"),
+                onTap: () {
+                  Navigator.pop(context); // Close the dialog
+                  getBusTimings(); // Call your function to get bus timings
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,16 +177,37 @@ class BusHomePage extends StatelessWidget {
             const NextTime(),
             const SizedBox(height: 10),
 
-            // Past and Next timings list
             Expanded(
-              child: Row(
+              child:
+                Row(
                 children: [
-                  const ListHome(title: "Past", isPast: true,),
+                  Expanded(
+                    child: Column(
+                        children: [
+                          Text("Past",
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,),
+                          ),
+                          ListHome(title: "Past", isPast: true,),
+                        ]
+                    ),
+                  ),
                   const SizedBox(width: 5),
-                  const ListHome(title: "Next", isPast: false,),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text("Next",
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,),
+                        ),
+                        ListHome(title: "Next", isPast: false,),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
+
             const SizedBox(height: 10),
 
             ElevatedButton(
@@ -143,14 +224,12 @@ class BusHomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        // onPressed: addroute,
-        // onPressed: removeRoute,
-        onPressed: addBusTiming,
-        // onPressed: getBusTimings,
-        tooltip: 'Increment',
+      floatingActionButton: isAdmin
+          ? FloatingActionButton(
+        onPressed: () => _showAdminOptionsDialog(context),
+        tooltip: 'Admin Options',
         child: const Icon(Icons.add),
-      ),
+      ) : null,
     );
   }
 }

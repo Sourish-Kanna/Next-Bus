@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class FirestoreService {
@@ -39,7 +40,7 @@ class FirestoreService {
         }
       }
     } catch (e) {
-      print("Error adding route: $e");
+      debugPrint("Error adding route: $e");
     }
   }
 
@@ -48,7 +49,7 @@ class FirestoreService {
     try {
       final routeDoc = await _firestore.collection('busRoutes').doc(routeName).get();
       if (!routeDoc.exists) {
-        print("Route not found!");
+        debugPrint("Route not found!");
         return;
       }
 
@@ -61,7 +62,7 @@ class FirestoreService {
         });
       }
     } catch (e) {
-      print("Error removing route: $e");
+      debugPrint("Error removing route: $e");
     }
   }
 
@@ -72,7 +73,7 @@ class FirestoreService {
       final routeDoc = await routeRef.get();
 
       if (!routeDoc.exists) {
-        print("Route not found!");
+        debugPrint("Route not found!");
         return;
       }
 
@@ -89,7 +90,7 @@ class FirestoreService {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error adding bus timing: $e");
+      debugPrint("Error adding bus timing: $e");
     }
   }
 
@@ -100,7 +101,7 @@ class FirestoreService {
       final routeDoc = await routeRef.get();
 
       if (!routeDoc.exists) {
-        print("Route not found!");
+        debugPrint("Route not found!");
         return;
       }
 
@@ -118,7 +119,7 @@ class FirestoreService {
 
       });
     } catch (e) {
-      print("Error deleting bus timing: $e");
+      debugPrint("Error deleting bus timing: $e");
     }
   }
 
@@ -129,7 +130,7 @@ class FirestoreService {
       final routeDoc = await routeRef.get();
 
       if (!routeDoc.exists) {
-        print("Route not found!");
+        debugPrint("Route not found!");
         return;
       }
 
@@ -141,7 +142,7 @@ class FirestoreService {
       int index = timings.indexWhere((timing) => timing['time'] == oldTime);
 
       if (index == -1) {
-        print("Old timing not found!");
+        debugPrint("Old timing not found!");
         return;
       }
 
@@ -162,9 +163,9 @@ class FirestoreService {
         'Last Updated': FieldValue.serverTimestamp(),
       });
 
-      print("Bus timing updated successfully!");
+      debugPrint("Bus timing updated successfully!");
     } catch (e) {
-      print("Error updating bus timing: $e");
+      debugPrint("Error updating bus timing: $e");
     }
   }
 
@@ -176,7 +177,7 @@ class FirestoreService {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error updating clustered timings: $e");
+      debugPrint("Error updating clustered timings: $e");
     }
   }
 
@@ -185,14 +186,14 @@ class FirestoreService {
     try {
       final routeDoc = await _firestore.collection('busRoutes').doc(routeName).get();
       if (!routeDoc.exists) {
-        print("Route not found!");
+        debugPrint("Route not found!");
         return [];
       }
 
       List<dynamic> timings = routeDoc.data()?['timings'] ?? [];
       return timings.map((entry) => (entry as Map<String, dynamic>)['time'] as String).toList();
     } catch (e) {
-      print("Error fetching bus timings: $e");
+      debugPrint("Error fetching bus timings: $e");
       return [];
     }
   }
@@ -208,7 +209,7 @@ class FirestoreService {
       );
       return routeDocs.map((doc) => doc.data()!).toList();
     } catch (e) {
-      print("Error fetching routes by stop: $e");
+      debugPrint("Error fetching routes by stop: $e");
       return [];
     }
   }
@@ -224,7 +225,7 @@ class FirestoreService {
       );
       return stopDocs.map((doc) => doc.data()!).toList();
     } catch (e) {
-      print("Error fetching stops by route: $e");
+      debugPrint("Error fetching stops by route: $e");
       return [];
     }
   }
@@ -240,7 +241,7 @@ class TimeBasedClustering {
       // Convert the time to minutes since midnight
       return parsedTime.hour * 60 + parsedTime.minute;
     } catch (e) {
-      print("Error parsing time: $e");
+      debugPrint("Error parsing time: $e");
       return -1;
     }
   }

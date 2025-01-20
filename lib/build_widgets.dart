@@ -36,7 +36,7 @@ class NextTime extends StatelessWidget {
   const NextTime({super.key});
 
   String getNextBus(BusTimingList provider) {
-    DateTime now = DateTime.now();
+    DateTime now = dateToFormat(DateTime.now());
     for (String time in provider.busTimings) {
       if (now.isBefore(stringToDate(time))) {
         return time;
@@ -221,11 +221,14 @@ class ListHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime nowtime = dateToFormat(DateTime.now());
     return Consumer<BusTimingList>(
       builder: (context, provider, child) {
         List<String> timings = isPast
-            ? provider.busTimings.where((time) => stringToDate(time).isBefore(DateTime.now())).toList()
-            : provider.busTimings.where((time) => stringToDate(time).isAfter(DateTime.now())).toList();
+            ? provider.busTimings.where((time) => stringToDate(time).isBefore(nowtime)).toList()
+            : provider.busTimings.where((time) => stringToDate(time).isAfter(nowtime)).toList();
+
+        timings = isPast ? timings.reversed.toList() : timings;
 
         return Expanded(
           child: ListView.builder(
