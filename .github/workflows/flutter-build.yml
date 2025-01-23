@@ -62,6 +62,16 @@ jobs:
           echo "New Version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      # Generate release notes from commit messages
+      - name: Generate Release Notes
+        id: generate_release_notes
+        run: |
+          echo "# Release Notes for ${{ env.NEW_VERSION }}" > release_notes.md
+          echo "" >> release_notes.md
+          git log --oneline --no-merges ${{ github.event.pull_request.base.sha }}..HEAD | while read line; do
+            echo "- $line" >> release_notes.md
+          done
+
       # Build the app
       - name: Build the app
         run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
