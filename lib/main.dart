@@ -14,7 +14,7 @@ final Map<String, WidgetBuilder> routes = {
   '/entries': (context) => const EntriesPage(),
 };
 
-final bool isAdmin = true;
+final bool isAdmin = false;
 String route = "56";
 String user = "test";
 
