@@ -3,9 +3,7 @@ name: Flutter Build and Tag
 on:
   push:
     branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
-#  workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -55,14 +53,6 @@ jobs:
           PATCH=${VERSION_PARTS[2]}
           PATCH=$((PATCH + 1))
           
-          if [ "$MAJOR" -eq 0 ]; then
-              MAJOR=1
-              MINOR=0
-              PATCH=0
-          else
-            PATCH=$((PATCH + 1))
-          fi
-
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           while git tag -l | grep -q "^$NEW_VERSION$"; do
             PATCH=$((PATCH + 1))
@@ -71,16 +61,6 @@ jobs:
 
           echo "New Version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-      # Generate release notes from commit messages
-      - name: Generate Release Notes
-        id: generate_release_notes
-        run: |
-          echo "# Release Notes for ${{ env.NEW_VERSION }}" > release_notes.md
-          echo "" >> release_notes.md
-          git log --oneline --no-merges ${{ github.event.pull_request.base.sha }}..HEAD | while read line; do
-            echo "- $line" >> release_notes.md
-          done
 
       # Build the app
       - name: Build the app
@@ -106,26 +86,5 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v2
         with:
-          tag_name: ${{ env.NEW_VERSION }}
-          release_name: Release ${{ env.NEW_VERSION }}
-          body_path: release_notes.md
-          draft: true
-          prerelease: false
-
-
-      # Verify Release Creation
-      - name: Verify Release
-        run: |
-          echo "Release created with tag: ${{ env.NEW_VERSION }}"
-          echo "Upload URL: ${{ steps.create_release.outputs.upload_url }}"
-
-      # Upload APK to Release
-      - name: Upload APK to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk"
-          asset_name: "Next-Bus-${{ env.NEW_VERSION }}.apk"
-          asset_content_type: application/vnd.android.package-archive
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk
