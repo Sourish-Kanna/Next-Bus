@@ -84,7 +84,7 @@ jobs:
 
       # Upload Build Artifact
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: flutter-apk
           path: build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk
