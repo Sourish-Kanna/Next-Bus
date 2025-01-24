@@ -53,7 +53,7 @@ jobs:
           # Add build files and commit
           cp -r build/web/* . # Move files to the root directory
           git add .
-          git commit -m "Deploy webapp to web-deploy branch"
+          git commit -m "Deploy webapp to web-deploy branch" || echo "No changes to commit"
 
           # Push changes
           git push origin web-deploy
