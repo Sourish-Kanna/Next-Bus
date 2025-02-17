@@ -1,8 +1,6 @@
 name: Save WebApp to web-deploy Branch
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
