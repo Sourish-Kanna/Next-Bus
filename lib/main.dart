@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:nextbus/build_widgets.dart';
+import 'package:nextbus/auth.dart';
 import 'package:provider/provider.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +11,7 @@ import 'package:nextbus/firebase_operations.dart';
 
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
+  '/login': (context) => const AuthScreen(),
   '/': (context) => const BusHomePage(),
   '/entries': (context) => const EntriesPage(),
 };
@@ -65,7 +67,8 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          initialRoute: '/',
+          initialRoute: '/login',
+          debugShowCheckedModeBanner: true,
           routes: routes,
         );
       },

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "878462952161",
+    "project_id": "next-bus-31103",
+    "storage_bucket": "next-bus-31103.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878462952161:android:c0f4ca92e5dbb100400da0",
+        "android_client_info": {
+          "package_name": "com.example.nextbus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878462952161-e3ak4ggputcmip5a27pfq7l0b8kj1v8j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nextbus",
+            "certificate_hash": "9a082b1b18908ca37f58a1270ecf453eb627506d"
+          }
+        },
+        {
+          "client_id": "878462952161-s7ippq8sceht3psednookcn5482ovteb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhmxMFTSut-kIg76pXzsgH0jP9gx01NaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878462952161-iasp5482k73lvdpc5suovjekchriu60p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
