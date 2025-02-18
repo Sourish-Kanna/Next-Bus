@@ -67,7 +67,7 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          initialRoute: '/login',
+          initialRoute: '/',
           debugShowCheckedModeBanner: true,
           routes: routes,
         );

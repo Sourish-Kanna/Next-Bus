@@ -15,19 +15,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Ensure all history is fetched
-    
+
       # Ensure on the main branch before pulling
       - name: Switch to Main Branch
         run: |
           git switch main || git checkout -b main origin/main 
-    
+
       # Fetch all Git tags
       - name: Fetch All Tags
         run: git fetch --tags
 
       # Set up JDK 17
       - name: Set up JDK 17
-        uses: actions/setup-java@v4.6.0
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -40,7 +40,7 @@ jobs:
       # Install dependencies
       - run: flutter pub get
 
-      # Increment Version
+      # Increment Version with auto-reset logic
       - name: Increment Version
         id: increment_version
         run: |
@@ -52,8 +52,22 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
           PATCH=$((PATCH + 1))
+
+          # Handle patch overflow
+          if [ "$PATCH" -gt 10 ]; then
+            PATCH=0
+            MINOR=$((MINOR + 1))
+          fi
+
+          # Handle minor overflow
+          if [ "$MINOR" -gt 10 ]; then
+            MINOR=0
+            MAJOR=$((MAJOR + 1))
+          fi
           
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          
+          # Ensure new version is unique
           while git tag -l | grep -q "^$NEW_VERSION$"; do
             PATCH=$((PATCH + 1))
             NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
@@ -64,7 +78,7 @@ jobs:
 
       # Build the app
       - name: Build the app
-        run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $(( $GITHUB_RUN_NUMBER + 1 ))
+        run: flutter build apk --release --build-name ${{ env.NEW_VERSION }} --build-number $GITHUB_RUN_NUMBER
 
       # Rename APK
       - name: Rename APK
@@ -82,6 +96,13 @@ jobs:
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
+      # Create Release Notes
+      - name: Generate Release Notes
+        run: |
+          echo "### Release ${{ env.NEW_VERSION }}" > release_notes.md
+          echo "#### Changes:" >> release_notes.md
+          git log $(git describe --tags --abbrev=0 @^)..@ --pretty=format:"- %s" >> release_notes.md
+
       # Create GitHub Release
       - name: Create GitHub Release
         id: create_release
@@ -89,10 +110,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.LATEST_TAG }}
-          release_name: Release ${{ env.LATEST_TAG }}
-          body_path: release_notes.md
-          draft: true
+          tag_name: ${{ env.NEW_VERSION }}
+          release_name: Release ${{ env.NEW_VERSION }}
+          body: ""  # No body in the release
+          draft: true  # Set release as a draft
           prerelease: false
 
       # Upload APK to Release
@@ -102,7 +123,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "Next-Bus-${{ env.LATEST_TAG }}.apk"
-          asset_name: "Next-Bus-${{ env.LATEST_TAG }}.apk"
+          asset_path: build/app/outputs/flutter-apk/Next-Bus-${{ env.NEW_VERSION }}.apk
+          asset_name: Next-Bus-${{ env.NEW_VERSION }}.apk
           asset_content_type: application/vnd.android.package-archive
-
