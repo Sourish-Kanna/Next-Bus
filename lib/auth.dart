@@ -2,51 +2,61 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Sign in with Google
+// Singleton AuthService
+class AuthService with ChangeNotifier {
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
+
+  AuthService._internal() {
+    _auth.authStateChanges().listen((User? user) {
+      _user = user;
+      notifyListeners();
+    });
+  }
+
+  User? get user => _user;
+
   Future<User?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return null;
-
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
-
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
-      UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
-      return userCredential.user;
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      _user = userCredential.user;
+      notifyListeners();
+      return _user;
     } catch (e) {
-      print("Google Sign-In Error: $e");
+      debugPrint("Google Sign-In Error: $e");
       return null;
     }
   }
 
-  // Sign in as Guest (Anonymous Login)
   Future<User?> signInAsGuest() async {
     try {
       UserCredential userCredential = await _auth.signInAnonymously();
-      return userCredential.user;
+      _user = userCredential.user;
+      notifyListeners();
+      return _user;
     } catch (e) {
-      print("Guest Login Error: $e");
+      debugPrint("Guest Login Error: $e");
       return null;
     }
   }
 
-  // Sign Out
   Future<void> signOut() async {
     await _auth.signOut();
     await GoogleSignIn().signOut();
+    _user = null;
+    notifyListeners();
   }
-
-  // Get Current User
-  User? get currentUser => _auth.currentUser;
 }
 
 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -7,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:nextbus/firebase_options.dart';
-import 'package:nextbus/firebase_operations.dart';
+import 'package:nextbus/route_provider.dart';
 
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
@@ -15,10 +16,6 @@ final Map<String, WidgetBuilder> routes = {
   '/': (context) => const BusHomePage(),
   '/entries': (context) => const EntriesPage(),
 };
-
-final bool isAdmin = false;
-String route = "56";
-String user = "test";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,22 +26,47 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    debugPrint('Firebase initialization failed: $e');
+    runApp(const ErrorScreen());
+    return;
   }
 
-  // Start the app
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => BusTimingList(route),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthService()),
+        ChangeNotifierProvider(create: (context) => BusTimingList()),
+        ChangeNotifierProvider(create: (context) => RouteProvider()),
+      ],
       child: const BusTimingApp(),
     ),
   );
+}
+
+class ErrorScreen extends StatelessWidget {
+  const ErrorScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, size: 80, color: Colors.red),
+              const SizedBox(height: 20),
+              const Text("Failed to initialize Firebase", style: TextStyle(fontSize: 20)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class BusTimingApp extends StatelessWidget {
@@ -80,57 +102,12 @@ class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
 
   void _showAdminOptionsDialog(BuildContext context) {
+    final routeProvider = Provider.of<RouteProvider>(context, listen: false);
+    final busTimingProvider = Provider.of<BusTimingList>(context, listen: false);
 
-    void addRoute() {
-      var firestoreService = FirestoreService();
-      List<String> timeList = [ "07:45 AM",
-        "08:00 AM", "08:15 AM", "09:00 AM", "10:15 AM", "10:30 AM", "11:10 AM",
-        "11:20 AM", "11:30 AM", "11:45 AM", "12:05 PM", "12:20 PM", "12:45 PM",
-        "12:50 PM", "12:55 PM", "01:15 PM", "01:30 PM", "01:40 PM", "01:45 PM",
-        "01:50 PM", "01:55 PM", "02:00 PM", "02:05 PM", "02:15 PM", "02:30 PM",
-        "02:50 PM", "03:20 PM", "03:25 PM", "03:35 PM", "03:45 PM", "03:50 PM",
-        "03:55 PM", "04:00 PM", "04:10 PM", "04:15 PM", "04:20 PM", "04:25 PM",
-        "04:30 PM", "04:40 PM", "04:45 PM", "04:55 PM", "05:00 PM", "05:05 PM",
-        "05:10 PM", "05:15 PM", "05:20 PM", "05:25 PM", "05:20 PM", "05:30 PM",
-        "05:40 PM", "05:45 PM", "06:00 PM", "06:05 PM", "06:25 PM", "06:45 PM",
-        "07:00 PM", "07:10 PM", "07:30 PM", "07:45 PM", "08:00 PM", "08:10 PM",
-        "09:20 PM", "09:40 PM", "10:05 PM"
-      ];
-      firestoreService.addRoute(
-        route,
-        ["Route 1", "Route 2"],
-        timeList,
-        "$user Route description",
-      );
-      // showAlertDialog(context);
-      allSnackBar(context, "Route Added", onUndo: null);
-      provideHapticFeedback();
-
-    }
-
-    void removeRoute() {
-      var firestoreService = FirestoreService();
-      firestoreService.removeRoute(route);
-      allSnackBar(context, "Route Deleted", onUndo: null);
-      provideHapticFeedback();
-    }
-
-    void addBusTiming() {
-      var firestoreService = FirestoreService();
-      String formattedTime = dateToString(DateTime.now());
-      firestoreService.addBusTiming(route, formattedTime, "$user Added via FAB");
-      allSnackBar(context, "Time Added",
-        onUndo: () {
-          String now = dateToString(DateTime.now());
-          Provider.of<BusTimingList>(context, listen: false).undoAddBusTiming(route, now, user);
-        },
-      );
-      provideHapticFeedback();
-    }
-
-    Future<void> getBusTimings() async {
-      var firestoreService = FirestoreService();
-      print(await firestoreService.getBusTimings(route));
+    void changeRoute(String newRoute) {
+      routeProvider.setRoute(newRoute);
+      Navigator.pop(context);
     }
 
     showDialog(
@@ -142,36 +119,38 @@ class BusHomePage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: const Icon(Icons.swap_horiz),
+                title: const Text("Change Route"),
+                onTap: () {
+                  changeRoute("102");
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.directions_bus),
                 title: const Text("Add Route"),
                 onTap: () {
-                  // Navigator.pop(context);
-                  addRoute(); // Call your function to add a route
-                  Navigator.pop(context); // Close the dialog
+                  // busTimingProvider.addRoute("102", ["Stop1", "Stop2"], ["10:00 AM", "10:30 AM"]);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.access_time),
                 title: const Text("Add Bus Timing"),
                 onTap: () {
-                  addBusTiming(); // Call your function to add a bus timing
-                  Navigator.pop(context); // Close the dialog
+                  busTimingProvider.addBusTiming("102", "Stop1", "11:00 AM");
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text("Remove Route"),
                 onTap: () {
-                  removeRoute(); // Call your function to remove a route
-                  Navigator.pop(context); // Close the dialog
+                  // busTimingProvider.removeRoute("102");
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.search),
                 title: const Text("View Timings"),
                 onTap: () {
-                  getBusTimings(); // Call your function to get bus timings
-                  Navigator.pop(context); // Close the dialog
+                  busTimingProvider.getBusTimings("102");
                 },
               ),
             ],
@@ -179,7 +158,7 @@ class BusHomePage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context);
               },
               child: const Text("Cancel"),
             ),
@@ -191,62 +170,62 @@ class BusHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final User? user = authService.user;
+
+    final routeProvider = Provider.of<RouteProvider>(context);
+    String route = routeProvider.route;
+    bool isAdmin = user != null && !user.isAnonymous;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Next Bus'),
+        title: Text(user != null
+            ? 'Welcome, ${user.displayName ?? "User"}'
+            : 'Next Bus'),
+        actions: [
+          if (user != null)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                await authService.signOut();
+              },
+            ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const NextTime(),
+            Text("Current Route: $route"),
+            NextTime(route: route),
             const SizedBox(height: 10),
-
             Expanded(
-              child:
-              Row(
+              child: Row(
                 children: [
                   Expanded(
                     child: Column(
-                        children: [
-                          Text("Past",
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,),
-                          ),
-                          ListHome(title: "Past", isPast: true,),
-                        ]
+                      children: [
+                        Text("Past", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        ListHome(title: "Past", isPast: true, route: route),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 5),
                   Expanded(
                     child: Column(
                       children: [
-                        Text("Next",
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,),
-                        ),
-                        ListHome(title: "Next", isPast: false,),
+                        Text("Next", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        ListHome(title: "Next", isPast: false, route: route),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 10),
-
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              ),
               onPressed: () => Navigator.pushNamed(context, '/entries'),
-              child: const Text(
-                "View Entries",
-                style: TextStyle(fontSize: 20),
-              ),
+              child: const Text("View All Timings", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -256,57 +235,28 @@ class BusHomePage extends StatelessWidget {
         onPressed: () => _showAdminOptionsDialog(context),
         tooltip: 'Admin Options',
         child: const Icon(Icons.add),
-      ) : null,
+      )
+          : null,
     );
   }
 }
+
 
 class EntriesPage extends StatelessWidget {
   const EntriesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final routeProvider = Provider.of<RouteProvider>(context);
+    String route = routeProvider.route;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Entries'),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "All Entries",
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const ListDisplay(),
-            const SizedBox(height: 10),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const AddTime(),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    "Go Back",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+        padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
+        child: ListDisplay(route: route,),
       ),
     );
   }
