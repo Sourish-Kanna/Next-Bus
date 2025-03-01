@@ -1,11 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart'; // Needed for kIsWeb
 import 'package:flutter/material.dart';
-import 'main.dart';
 
-
-
-// Singleton AuthService
 class AuthService with ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -24,15 +21,23 @@ class AuthService with ChangeNotifier {
 
   Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null;
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-      _user = userCredential.user;
+      if (kIsWeb) {
+        // Web implementation
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        UserCredential userCredential = await _auth.signInWithPopup(googleProvider);
+        _user = userCredential.user;
+      } else {
+        // Mobile implementation
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        if (googleUser == null) return null;
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        UserCredential userCredential = await _auth.signInWithCredential(credential);
+        _user = userCredential.user;
+      }
       notifyListeners();
       return _user;
     } catch (e) {
@@ -55,56 +60,10 @@ class AuthService with ChangeNotifier {
 
   Future<void> signOut() async {
     await _auth.signOut();
-    // await GoogleSignIn().signOut();
-    // _user = null;
-    // notifyListeners();
-  }
-}
-
-
-class AuthScreen extends StatelessWidget {
-  const AuthScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
-
-    return Scaffold(
-      appBar: AppBar(title: const Text("Next Bus Login")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.account_circle),
-              label: const Text("Sign in with Google"),
-              onPressed: () async {
-                User? user = await authService.signInWithGoogle();
-                if (user != null) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => BusHomePage()),
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.person_outline),
-              label: const Text("Continue as Guest"),
-              onPressed: () async {
-                User? user = await authService.signInAsGuest();
-                if (user != null) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => BusHomePage()),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    if (!kIsWeb) {
+      await GoogleSignIn().signOut();
+    }
+    _user = null;
+    notifyListeners();
   }
 }
