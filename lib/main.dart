@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -9,14 +11,12 @@ import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:nextbus/firebase_options.dart';
 import 'package:nextbus/route_provider.dart';
-
 import 'firebase_operations.dart';
 
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const AuthScreen(),
   '/': (context) => const BusHomePage(),
-  '/entries': (context) => const EntriesPage(),
 };
 
 void main() async {
@@ -32,10 +32,17 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // FirebaseFirestore firestore = FirebaseFirestore.instance;
+    // if (kIsWeb) {
+    //   await firestore.settings = const Settings(persistenceEnabled: true);
+    // }
   } catch (e) {
+    debugPrint("error : $e");
     runApp(const ErrorScreen());
     return;
   }
+
+  User? user = FirebaseAuth.instance.currentUser;
 
   runApp(
     MultiProvider(
@@ -44,7 +51,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => BusTimingList()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
-      child: const BusTimingApp(),
+      child: BusTimingApp(isLoggedIn: user != null),
     ),
   );
 }
@@ -63,7 +70,8 @@ class ErrorScreen extends StatelessWidget {
               const Icon(Icons.error, size: 80, color: Colors.red),
               const SizedBox(height: 20),
               const Text("Failed to initialize Firebase", style: TextStyle(fontSize: 20)),
-              const Text("Try again later, by turning on internet and restarting the app", style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 20),
+              const Text("Try again later, by turning on internet", style: TextStyle(fontSize: 20)),
             ],
           ),
         ),
@@ -73,7 +81,8 @@ class ErrorScreen extends StatelessWidget {
 }
 
 class BusTimingApp extends StatelessWidget {
-  const BusTimingApp({super.key});
+  final bool isLoggedIn;
+  const BusTimingApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +101,7 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          initialRoute: '/',
+          initialRoute: isLoggedIn ? '/' : '/login',
           debugShowCheckedModeBanner: true,
           routes: routes,
         );
@@ -104,7 +113,7 @@ class BusTimingApp extends StatelessWidget {
 class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
 
-  void _showAdminOptionsDialog(BuildContext context, User? user, route) {
+  void _showAdminOptionsDialog(BuildContext context, User? user) {
     final routeProvider = Provider.of<RouteProvider>(context, listen: false);
     final busTimingProvider = Provider.of<BusTimingList>(context, listen: false);
 
@@ -134,7 +143,7 @@ class BusHomePage extends StatelessWidget {
                 leading: const Icon(Icons.directions_bus),
                 title: const Text("Add Route"),
                 onTap: () {
-                  firestoreService.addRoute("102", ["Stop1", "Stop2"], ["10:00 AM", "10:30 AM"], "test");
+                  firestoreService.addRoute("102", ["Stop1", "Stop2"], ["10:00 AM", "10:30 AM"], user!.uid);
                 },
               ),
               ListTile(
@@ -148,7 +157,7 @@ class BusHomePage extends StatelessWidget {
                 leading: const Icon(Icons.delete),
                 title: const Text("Remove Route"),
                 onTap: () {
-                  firestoreService.removeRoute("102","test1");
+                  firestoreService.removeRoute("102",user!.uid);
                 },
               ),
               ListTile(
@@ -159,16 +168,12 @@ class BusHomePage extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.search),
+                leading: const Icon(Icons.telegram),
                 title: const Text("display all var"),
                 onTap: () {
-                  // print("routeProvider : $routeProvider");
-                  print("routeProvider : ${routeProvider.route}");
-                  print("route var: ${route}");
-                  // print("busTimingProvider : $busTimingProvider");
-                  // print("firestoreService : $firestoreService");
-                  print("user id : ${user?.uid}");
-                  print("auth: ${user?.isAnonymous}");
+                  debugPrint("route : ${routeProvider.route}");
+                  debugPrint("user id : ${user?.uid}");
+                  debugPrint("auth: ${user?.isAnonymous}");
 
                 },
               ),
@@ -192,22 +197,35 @@ class BusHomePage extends StatelessWidget {
     final authService = Provider.of<AuthService>(context);
     final User? user = authService.user;
 
+    // Redirect to login if user is not authenticated
+    if (user == null) {
+      Future.microtask(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthScreen()),
+        );
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     final routeProvider = Provider.of<RouteProvider>(context);
     String route = routeProvider.route;
-    bool isAdmin = user != null && !user.isAnonymous;
+    bool isAdmin = !user.isAnonymous;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(user != null
-            ? 'Welcome, ${user.displayName ?? "User"}'
-            : 'Next Bus'),
+        title: Text('Welcome, ${user.displayName ?? "User"}'),
         actions: [
           if (user != null)
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () async {
                 await authService.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AuthScreen()),
+                );
               },
             ),
         ],
@@ -243,6 +261,10 @@ class BusHomePage extends StatelessWidget {
               ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
               onPressed: () => Navigator.pushNamed(context, '/entries'),
               child: const Text("View All Timings", style: TextStyle(fontSize: 20)),
             ),
@@ -251,7 +273,7 @@ class BusHomePage extends StatelessWidget {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
-        onPressed: () => _showAdminOptionsDialog(context, user,route),
+        onPressed: () => _showAdminOptionsDialog(context, user),
         tooltip: 'Admin Options',
         child: const Icon(Icons.add),
       )
@@ -266,7 +288,12 @@ class EntriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeProvider = Provider.of<RouteProvider>(context);
+    final authService = Provider.of<AuthService>(context); // Get AuthService instance
+    final User? user = authService.user; // Retrieve the currently logged-in user
+
     String route = routeProvider.route;
+    String userId = user?.uid ?? "guest"; // Use "guest" if the user is not logged in
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -274,7 +301,40 @@ class EntriesPage extends StatelessWidget {
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
-        child: ListDisplay(route: route,),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "All Entries",
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            ListDisplay(route: route),
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AddTime(userId: userId,route: route),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Go Back",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

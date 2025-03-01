@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
-
 import 'main.dart';
 
 
@@ -56,9 +55,9 @@ class AuthService with ChangeNotifier {
 
   Future<void> signOut() async {
     await _auth.signOut();
-    await GoogleSignIn().signOut();
-    _user = null;
-    notifyListeners();
+    // await GoogleSignIn().signOut();
+    // _user = null;
+    // notifyListeners();
   }
 }
 
@@ -98,55 +97,11 @@ class AuthScreen extends StatelessWidget {
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
+                    MaterialPageRoute(builder: (context) => BusHomePage()),
                   );
                 }
               },
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  final User user;
-  const HomeScreen({super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Next Bus"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService().signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const AuthScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Welcome, ${user.displayName ?? 'Guest'}",
-                style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 10),
-            user.photoURL != null
-                ? CircleAvatar(
-              backgroundImage: NetworkImage(user.photoURL!),
-              radius: 40,
-            )
-                : const Icon(Icons.account_circle, size: 80),
-            const SizedBox(height: 20),
-            Text("User ID: ${user.uid}", style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
