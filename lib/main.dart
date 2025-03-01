@@ -10,6 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:nextbus/firebase_options.dart';
 import 'package:nextbus/route_provider.dart';
 
+import 'firebase_operations.dart';
+
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const AuthScreen(),
@@ -61,6 +63,7 @@ class ErrorScreen extends StatelessWidget {
               const Icon(Icons.error, size: 80, color: Colors.red),
               const SizedBox(height: 20),
               const Text("Failed to initialize Firebase", style: TextStyle(fontSize: 20)),
+              const Text("Try again later, by turning on internet and restarting the app", style: TextStyle(fontSize: 20)),
             ],
           ),
         ),
@@ -101,9 +104,11 @@ class BusTimingApp extends StatelessWidget {
 class BusHomePage extends StatelessWidget {
   const BusHomePage({super.key});
 
-  void _showAdminOptionsDialog(BuildContext context) {
+  void _showAdminOptionsDialog(BuildContext context, User? user, route) {
     final routeProvider = Provider.of<RouteProvider>(context, listen: false);
     final busTimingProvider = Provider.of<BusTimingList>(context, listen: false);
+
+    var firestoreService = FirestoreService();
 
     void changeRoute(String newRoute) {
       routeProvider.setRoute(newRoute);
@@ -129,7 +134,7 @@ class BusHomePage extends StatelessWidget {
                 leading: const Icon(Icons.directions_bus),
                 title: const Text("Add Route"),
                 onTap: () {
-                  // busTimingProvider.addRoute("102", ["Stop1", "Stop2"], ["10:00 AM", "10:30 AM"]);
+                  firestoreService.addRoute("102", ["Stop1", "Stop2"], ["10:00 AM", "10:30 AM"], "test");
                 },
               ),
               ListTile(
@@ -143,7 +148,7 @@ class BusHomePage extends StatelessWidget {
                 leading: const Icon(Icons.delete),
                 title: const Text("Remove Route"),
                 onTap: () {
-                  // busTimingProvider.removeRoute("102");
+                  firestoreService.removeRoute("102","test1");
                 },
               ),
               ListTile(
@@ -151,6 +156,20 @@ class BusHomePage extends StatelessWidget {
                 title: const Text("View Timings"),
                 onTap: () {
                   busTimingProvider.getBusTimings("102");
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: const Text("display all var"),
+                onTap: () {
+                  // print("routeProvider : $routeProvider");
+                  print("routeProvider : ${routeProvider.route}");
+                  print("route var: ${route}");
+                  // print("busTimingProvider : $busTimingProvider");
+                  // print("firestoreService : $firestoreService");
+                  print("user id : ${user?.uid}");
+                  print("auth: ${user?.isAnonymous}");
+
                 },
               ),
             ],
@@ -232,7 +251,7 @@ class BusHomePage extends StatelessWidget {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
-        onPressed: () => _showAdminOptionsDialog(context),
+        onPressed: () => _showAdminOptionsDialog(context, user,route),
         tooltip: 'Admin Options',
         child: const Icon(Icons.add),
       )
@@ -240,7 +259,6 @@ class BusHomePage extends StatelessWidget {
     );
   }
 }
-
 
 class EntriesPage extends StatelessWidget {
   const EntriesPage({super.key});

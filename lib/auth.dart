@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 
+import 'main.dart';
+
+
 
 // Singleton AuthService
 class AuthService with ChangeNotifier {
@@ -81,7 +84,7 @@ class AuthScreen extends StatelessWidget {
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
+                    MaterialPageRoute(builder: (context) => BusHomePage()),
                   );
                 }
               },

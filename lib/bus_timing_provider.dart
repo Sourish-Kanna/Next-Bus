@@ -22,6 +22,7 @@ class BusTimingList with ChangeNotifier {
 
   /// Get bus timings for a specific route
   List<String> getBusTimings(String route) {
+    fetchBusTimings(route);
     return _routeBusTimings[route] ?? [];
   }
 

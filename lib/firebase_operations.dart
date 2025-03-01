@@ -13,55 +13,78 @@ class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// **Logs user activities in the "logs" collection**
-  Future<void> _logActivity(String action, String userId, String details) async {
-    await _firestore.collection('activityLogs').add({
+  Future<void> _logActivity(String action, String userId, String description) async {
+    final logRef = _firestore.collection('activityLogs').doc(action + "_" + userId);
+    await logRef.set({
       'action': action,
       'userId': userId,
-      'details': details,
+      'description': description,
       'timestamp': FieldValue.serverTimestamp(),
-    });
+    }, SetOptions(merge: true));
   }
 
   /// **Add a new bus route (Atomic)**
   Future<void> addRoute(String routeName, List<String> stops, List<String> timings, String userId) async {
+    final routeRef = _firestore.collection('busRoutes').doc(routeName);
+    final stopRefs = stops.map((stop) => _firestore.collection('busStops').doc(stop)).toList();
+
+    // **Read all documents BEFORE transaction**
+    final routeDoc = await routeRef.get();
+    final stopDocs = await Future.wait(stopRefs.map((ref) => ref.get()));
+
     return _firestore.runTransaction((transaction) async {
-      final routeRef = _firestore.collection('busRoutes').doc(routeName);
-      final routeDoc = await transaction.get(routeRef);
+      List<Map<String, String>> newTimingObjects =
+      timings.map((time) => {'time': time, 'addedBy': userId}).toList();
 
+      // **Fix: Handle dynamic types properly**
       if (routeDoc.exists) {
-        // Get existing data and check if it's the same
         List<String> existingStops = List<String>.from(routeDoc.data()?['stops'] ?? []);
-        List<Map<String, String>> existingTimings = List<Map<String, String>>.from(routeDoc.data()?['timings'] ?? []);
 
-        List<Map<String, String>> newTimingObjects = timings.map((time) => {'time': time, 'addedBy': userId}).toList();
+        List<Map<String, dynamic>> existingTimingsDynamic =
+        List<Map<String, dynamic>>.from(routeDoc.data()?['timings'] ?? []);
+
+        List<Map<String, String>> existingTimings = existingTimingsDynamic
+            .map((timing) => {
+          'time': timing['time'] as String? ?? '',
+          'addedBy': timing['addedBy'] as String? ?? '',
+        })
+            .toList();
 
         if (existingStops == stops && existingTimings == newTimingObjects) {
           return; // 🔥 No changes, skip update
         }
       }
 
-      transaction.set(routeRef, {
-        'routeName': routeName,
-        'stops': stops,
-        'timings': timings.map((time) => {'time': time, 'addedBy': userId}).toList(),
-        'updatedBy': userId,
-        'lastUpdated': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      // **Write new route data**
+      transaction.set(
+        routeRef,
+        {
+          'routeName': routeName,
+          'stops': stops,
+          'timings': newTimingObjects,
+          'updatedBy': userId,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
 
-      for (String stop in stops) {
-        final stopRef = _firestore.collection('busStops').doc(stop);
-        final stopDoc = await transaction.get(stopRef);
+      // **Write stop data**
+      for (int i = 0; i < stops.length; i++) {
+        final stopRef = stopRefs[i];
+        final stopDoc = stopDocs[i];
 
         if (!stopDoc.exists) {
-          transaction.set(stopRef, {'stopName': stop, 'routes': [routeName]});
+          transaction.set(stopRef, {'stopName': stops[i], 'routes': [routeName]});
         } else {
           transaction.update(stopRef, {'routes': FieldValue.arrayUnion([routeName])});
         }
       }
-
-      // await _logActivity(transaction, "Added Route", userId, "Route: $routeName with stops: ${stops.join(', ')}");
     }).then((_) async {
+      // ✅ Logging after transaction completes
       await _logActivity("Added Route", userId, "Route: $routeName with stops: ${stops.join(', ')}");
+    }).catchError((error) {
+      // ❌ Handle errors properly
+      print("Failed to add route: $error");
     });
   }
 
