@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -17,6 +17,7 @@ import 'firebase_operations.dart';
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const AuthScreen(),
   '/': (context) => const BusHomePage(),
+  '/entries': (context) => const EntriesPage(),
 };
 
 void main() async {

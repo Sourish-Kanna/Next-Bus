@@ -117,7 +117,7 @@ class FirestoreService {
 
       if (!routeDoc.exists) return;
 
-      List<Map<String, String>> timings = List<Map<String, String>>.from(routeDoc.data()?['timings'] ?? []);
+      List<Map<String, dynamic>> timings = List<Map<String, dynamic>>.from(routeDoc.data()?['timings'] ?? []);
 
       if (timings.any((entry) => entry['time'] == time)) {
         return; // 🔥 No changes, skip update
@@ -144,7 +144,7 @@ class FirestoreService {
 
       if (!routeDoc.exists) return;
 
-      List<Map<String, String>> timings = List<Map<String, String>>.from(routeDoc.data()?['timings'] ?? []);
+      List<Map<String, dynamic>> timings = List<Map<String, dynamic>>.from(routeDoc.data()?['timings'] ?? []);
 
       if (!timings.any((entry) => entry['time'] == time)) {
         return; // 🔥 No changes, skip update
@@ -171,7 +171,7 @@ class FirestoreService {
 
       if (!routeDoc.exists) return;
 
-      List<Map<String, String>> timings = List<Map<String, String>>.from(routeDoc.data()?['timings'] ?? []);
+      List<Map<String, dynamic>> timings = List<Map<String, dynamic>>.from(routeDoc.data()?['timings'] ?? []);
 
       int index = timings.indexWhere((timing) => timing['time'] == oldTime);
       if (index == -1 || timings[index]['time'] == newTime) {
