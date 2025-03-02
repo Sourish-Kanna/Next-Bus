@@ -13,7 +13,7 @@ import 'package:nextbus/build_pages.dart';
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const AuthScreen(),
-  '/': (context) => const BusHomePage(),
+  // '/': (context) => const BusHomePage(),
   '/entries': (context) => const EntriesPage(),
 };
 
@@ -45,14 +45,14 @@ void main() async {
         ChangeNotifierProvider(create: (context) => BusTimingList()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
-      child: BusTimingApp(isLoggedIn: user != null),
+      // child: BusTimingApp(isLoggedIn: user != null),
+      child: BusTimingApp()
     ),
   );
 }
 
 class BusTimingApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const BusTimingApp({super.key, required this.isLoggedIn});
+  const BusTimingApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +71,24 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          // initialRoute: isLoggedIn ? '/' : '/login',
-          initialRoute: '/',
+          // initialRoute: '/',
           debugShowCheckedModeBanner: true,
           routes: routes,
+          home: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator(); // Or a loading screen
+              }
+              if (snapshot.hasData) {
+                // User is logged in
+                return const BusHomePage();
+              } else {
+                // User is not logged in
+                return const AuthScreen();
+              }
+            },
+          ),
         );
       },
     );

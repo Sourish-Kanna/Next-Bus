@@ -8,36 +8,47 @@ class AuthService with ChangeNotifier {
   factory AuthService() => _instance;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   User? _user;
+  User? get user => _auth.currentUser;
 
   AuthService._internal() {
+    _initializeAuth();
+  }
+
+
+  /// Ensures Firebase Auth persistence & listens for auth changes
+  Future<void> _initializeAuth() async {
+    // await _auth.setPersistence(Persistence.LOCAL); // ✅ Keep user signed in
     _auth.authStateChanges().listen((User? user) {
       _user = user;
       notifyListeners();
     });
   }
 
-  User? get user => _user;
-
+  /// 🔹 Google Sign-In (Web & Mobile)
   Future<User?> signInWithGoogle() async {
     try {
+      UserCredential userCredential;
       if (kIsWeb) {
-        // Web implementation
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        UserCredential userCredential = await _auth.signInWithPopup(googleProvider);
-        _user = userCredential.user;
+        userCredential = await _auth.signInWithPopup(googleProvider);
       } else {
-        // Mobile implementation
-        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-        if (googleUser == null) return null;
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return null; // User canceled sign-in
+
+        final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
         final AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        UserCredential userCredential = await _auth.signInWithCredential(credential);
-        _user = userCredential.user;
+
+        userCredential = await _auth.signInWithCredential(credential);
       }
+
+      _user = userCredential.user;
       notifyListeners();
       return _user;
     } catch (e) {
@@ -46,6 +57,7 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  /// 🔹 Guest Login (Anonymous Sign-In)
   Future<User?> signInAsGuest() async {
     try {
       UserCredential userCredential = await _auth.signInAnonymously();
@@ -58,17 +70,22 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  /// 🔹 Logout & Delete Anonymous Users
   Future<void> signOut() async {
-    if (_auth.currentUser != null && _auth.currentUser!.isAnonymous) {
-      try {
-        await _auth.currentUser!.delete(); // ✅ Delete anonymous user
-        debugPrint("Anonymous user deleted successfully.");
-      } catch (e) {
-        debugPrint("Error deleting anonymous user: $e");
-      }
-    }
+    try {
+      if (_auth.currentUser != null) {
+        if (_auth.currentUser!.isAnonymous) {
+          await _auth.currentUser!.delete(); // ✅ Delete anonymous user
+          debugPrint("Anonymous user deleted successfully.");
+        }
 
-    await _auth.signOut(); // ✅ Sign out after deletion (or normal sign-out)
-    notifyListeners();
+        await _googleSignIn.signOut(); // ✅ Ensure Google sign-out
+        await _auth.signOut(); // ✅ Sign out from Firebase Auth
+        _user = null;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Sign-Out Error: $e");
+    }
   }
 }

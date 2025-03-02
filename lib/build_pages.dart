@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:nextbus/auth.dart';
 import 'package:nextbus/route_provider.dart';
 import 'package:provider/provider.dart';
-
 import 'bus_timing_provider.dart';
 
 
@@ -120,25 +119,28 @@ class BusHomePage extends StatelessWidget {
     final authService = Provider.of<AuthService>(context);
     final User? user = authService.user;
 
-    // Redirect to login if user is not authenticated
-    if (user == null) {
-      Future.microtask(() {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AuthScreen()),
-        );
-      });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    // // Redirect to login if user is not authenticated
+    // if (user == null) {
+    //   Future.microtask(() {
+    //     Navigator.pushReplacement(
+    //       context,
+    //       MaterialPageRoute(builder: (context) => const AuthScreen()),
+    //     );
+    //   });
+    //   return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    // }
 
     final routeProvider = Provider.of<RouteProvider>(context);
     String route = routeProvider.route;
-    bool isAdmin = !user.isAnonymous;
+    bool isAdmin = false; // Default to false if user is null
+    if (user != null) {
+      isAdmin = !user.isAnonymous;
+    }
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Welcome, ${user.displayName ?? "User"}'),
+        title: Text('Welcome, ${user?.displayName ?? "User"}'),
         actions: [
           if (user != null)
             IconButton(
