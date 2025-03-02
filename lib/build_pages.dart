@@ -133,7 +133,7 @@ class BusHomePage extends StatelessWidget {
 
     final routeProvider = Provider.of<RouteProvider>(context);
     String route = routeProvider.route;
-    bool isAdmin = user!.isAnonymous;
+    bool isAdmin = !user.isAnonymous;
 
     return Scaffold(
       appBar: AppBar(

@@ -59,11 +59,16 @@ class AuthService with ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
-    if (!kIsWeb) {
-      await GoogleSignIn().signOut();
+    if (_auth.currentUser != null && _auth.currentUser!.isAnonymous) {
+      try {
+        await _auth.currentUser!.delete(); // ✅ Delete anonymous user
+        debugPrint("Anonymous user deleted successfully.");
+      } catch (e) {
+        debugPrint("Error deleting anonymous user: $e");
+      }
     }
-    _user = null;
+
+    await _auth.signOut(); // ✅ Sign out after deletion (or normal sign-out)
     notifyListeners();
   }
 }
