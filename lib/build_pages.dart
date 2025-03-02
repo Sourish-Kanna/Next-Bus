@@ -90,7 +90,7 @@ class BusHomePage extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.telegram),
+                leading: const Icon(Icons.print),
                 title: const Text("display all var"),
                 onTap: () {
                   debugPrint("route : ${routeProvider.route}");
@@ -119,17 +119,6 @@ class BusHomePage extends StatelessWidget {
     final authService = Provider.of<AuthService>(context);
     final User? user = authService.user;
 
-    // // Redirect to login if user is not authenticated
-    // if (user == null) {
-    //   Future.microtask(() {
-    //     Navigator.pushReplacement(
-    //       context,
-    //       MaterialPageRoute(builder: (context) => const AuthScreen()),
-    //     );
-    //   });
-    //   return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    // }
-
     final routeProvider = Provider.of<RouteProvider>(context);
     String route = routeProvider.route;
     bool isAdmin = false; // Default to false if user is null
@@ -140,7 +129,7 @@ class BusHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Welcome, ${user?.displayName ?? "User"}'),
+        title: Text(route),
         actions: [
           if (user != null)
             IconButton(
@@ -160,7 +149,6 @@ class BusHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Current Route: $route"),
             NextTime(route: route),
             const SizedBox(height: 10),
             Expanded(
@@ -200,7 +188,7 @@ class BusHomePage extends StatelessWidget {
           ? FloatingActionButton(
         onPressed: () => _showAdminOptionsDialog(context, user),
         tooltip: 'Admin Options',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.admin_panel_settings),
       )
           : null,
     );

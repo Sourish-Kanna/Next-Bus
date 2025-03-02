@@ -1,10 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:nextbus/bus_timing_provider.dart';
 import 'package:provider/provider.dart';
-
-String user = "test"; // Hardcoded user (Replace with actual auth logic)
+import 'package:nextbus/auth.dart';
 
 // Haptic feedback for user actions
 void provideHapticFeedback() {
@@ -89,6 +89,13 @@ class ListDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final User? user = authService.user;
+    bool isAdmin = false; // Default to false if user is null
+    if (user != null) {
+      isAdmin = !user.isAnonymous;
+    }
+
     return FutureBuilder(
       future: Provider.of<BusTimingList>(context, listen: false).fetchBusTimings(route),
       builder: (context, snapshot) {
@@ -109,59 +116,61 @@ class ListDisplay extends StatelessWidget {
                 ),
               );
             }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: timings.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Slidable(
-                    key: ValueKey(timings[index]),
-                    startActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (_) => provider.deleteBusTiming(route, index, user),
-                          backgroundColor: Colors.red,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+            return Expanded(
+              child: ListView.builder(
+                itemCount: timings.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Slidable(
+                      key: ValueKey(timings[index]),
+                      startActionPane: isAdmin
+                        ? ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) => provider.deleteBusTiming(route, index, user!.uid),
+                            backgroundColor: Colors.red,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                          ),
+                        ],
+                      ) : null,
+                      endActionPane: isAdmin
+                        ? ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) => _editBusTiming(context, index, provider),
+                            backgroundColor: Colors.blue,
+                            icon: Icons.edit,
+                            label: 'Edit',
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                          ),
+                        ],
+                      ) : null,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
-                    ),
-                    endActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (_) => _editBusTiming(context, index, provider),
-                          backgroundColor: Colors.blue,
-                          icon: Icons.edit,
-                          label: 'Edit',
-                          borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
-                        ),
-                      ],
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        title: Center(
-                          child: Text(
-                            timings[index],
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        child: ListTile(
+                          title: Center(
+                            child: Text(
+                              timings[index],
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           },
         );
@@ -178,11 +187,14 @@ class ListDisplay extends StatelessWidget {
       initialTime: TimeOfDay.fromDateTime(initialTime),
     );
 
+
     if (pickedTime != null) {
       String formattedTime = dateToString(
         DateTime(0, 0, 0, pickedTime.hour, pickedTime.minute),
       );
-      provider.editBusTiming(route, index, formattedTime, user);
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final User? user = authService.user;
+      provider.editBusTiming(route, index, formattedTime, user!.uid);
     }
   }
 }
