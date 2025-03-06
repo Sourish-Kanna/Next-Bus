@@ -14,7 +14,7 @@ class FirestoreService {
 
   /// **Logs user activities in the "logs" collection**
   Future<void> _logActivity(String action, String userId, String description) async {
-    final logRef = _firestore.collection('activityLogs').doc(action + "_" + userId);
+    final logRef = _firestore.collection('activityLogs').doc("${action}_$userId");
     await logRef.set({
       'action': action,
       'userId': userId,
