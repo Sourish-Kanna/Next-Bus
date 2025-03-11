@@ -36,8 +36,6 @@ void main() async {
     return;
   }
 
-  User? user = FirebaseAuth.instance.currentUser;
-
   runApp(
     MultiProvider(
       providers: [
@@ -45,7 +43,6 @@ void main() async {
         ChangeNotifierProvider(create: (context) => BusTimingList()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
-      // child: BusTimingApp(isLoggedIn: user != null),
       child: BusTimingApp()
     ),
   );
