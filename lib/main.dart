@@ -13,7 +13,7 @@ import 'package:nextbus/build_pages.dart';
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const AuthScreen(),
-  // '/': (context) => const BusHomePage(),
+  '/route': (context) => const RouteSelect(),
   '/entries': (context) => const EntriesPage(),
 };
 
@@ -71,7 +71,6 @@ class BusTimingApp extends StatelessWidget {
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: ThemeMode.system,
-          // initialRoute: '/',
           debugShowCheckedModeBanner: true,
           routes: routes,
           home: StreamBuilder<User?>(
