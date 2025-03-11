@@ -292,6 +292,7 @@ class BusHomePage extends StatelessWidget {
                 ),
                 ListTile(
                   title: const Text("Route Selector"),
+                  leading: const Icon(Icons.select_all),
                   onTap: () {
                     Navigator.pushNamed(context, '/route');
                   },
