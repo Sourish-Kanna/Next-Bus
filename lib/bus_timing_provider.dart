@@ -10,97 +10,94 @@ DateTime stringToDate(String time) {
   return DateFormat('h:mm a').parse(time);
 }
 
-DateTime dateToFormat(DateTime time) {
-  return DateFormat('h:mm a').parse(dateToString(time));
+DateTime dateToFormat(DateTime now) {
+  String formattedTime = DateFormat('h:mm a').format(now);
+  return DateFormat('h:mm a').parse(formattedTime);
 }
 
 class BusTimingList with ChangeNotifier {
   final FirestoreService _firebaseService = FirestoreService();
-  final List<String> _busTimings = [];
+  final Map<String, List<String>> _routeBusTimings = {}; // Store timings per route
 
-  BusTimingList(String route) {
+
+  /// Get bus timings for a specific route
+  List<String> getBusTimings(String route) {
     fetchBusTimings(route);
+    return _routeBusTimings[route] ?? [];
   }
 
-  List<String> get busTimings => _busTimings;
-
+  /// Fetch bus timings from Firestore for a specific route
   Future<void> fetchBusTimings(String route) async {
+    if (route.isEmpty) return;
     try {
       final List<String> timings = await _firebaseService.getBusTimings(route);
-      _busTimings.clear();
-      _busTimings.addAll(timings);
-      _busTimings.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
+      _routeBusTimings[route] = timings
+        ..sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
+
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error fetching bus timings: $e');
-      return;
+      debugPrint('🔥 Error fetching bus timings: $e');
     }
-    notifyListeners();
   }
 
-  void addBusTiming(String route, String user) async {
-    DateTime now = DateTime.now();
-    String formattedTime = dateToString(now);
-
-    // Add to Firestore
+  /// Add a new bus timing for a specific route
+  Future<void> addBusTiming(String route, String newTime, String user) async {
+    if (route.isEmpty) return;
     try {
-      await _firebaseService.addBusTiming(route, formattedTime, user);
+      await _firebaseService.addBusTiming(route, newTime, user);
+      _routeBusTimings.putIfAbsent(route, () => []);
+      _routeBusTimings[route]!
+        ..add(newTime)
+        ..sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
+
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error adding bus timing: $e');
-      return;
+      debugPrint('🔥 Error adding bus timing: $e');
     }
-
-    _busTimings.add(formattedTime);
-    _busTimings.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
-
-    notifyListeners();
   }
 
-  void undoAddBusTiming(String route, String time, String user) async {
-        // Remove from Firestore
-    try {
-      await _firebaseService.deleteBusTiming(route, time, user);
-    } catch (e) {
-      debugPrint('Error undoing add bus timing: $e');
-      return;
-    }
+  /// Delete a bus timing from a specific route
+  Future<void> deleteBusTiming(String route, int index, String user) async {
+    if (route.isEmpty || index < 0 || !_routeBusTimings.containsKey(route)) return;
 
-    _busTimings.remove(time);
-    _busTimings.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
+    String timeToDelete = _routeBusTimings[route]![index];
 
-    notifyListeners();
-  }
-
-  void deleteBusTiming(String route, int index, String user) async {
-    String timeToDelete = _busTimings[index];
-
-    // Remove from Firestore
     try {
       await _firebaseService.deleteBusTiming(route, timeToDelete, user);
+      _routeBusTimings[route]!.removeAt(index);
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error deleting bus timing: $e');
-      return;
+      debugPrint('🔥 Error deleting bus timing: $e');
     }
-
-    _busTimings.removeAt(index);
-    _busTimings.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
-
-    notifyListeners();
   }
 
-  void editBusTiming(String route, int index, String newTime, String user) async {
-    String oldTime = _busTimings[index];
+  /// Undo last added bus timing for a specific route
+  Future<void> undoAddBusTiming(String route, String time, String user) async {
+    if (route.isEmpty || !_routeBusTimings.containsKey(route) || !_routeBusTimings[route]!.contains(time)) return;
 
-    // Update Firestore
+    try {
+      await _firebaseService.deleteBusTiming(route, time, user);
+      _routeBusTimings[route]!.remove(time);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('🔥 Error undoing add bus timing: $e');
+    }
+  }
+
+  /// Edit an existing bus timing for a specific route
+  Future<void> editBusTiming(String route, int index, String newTime, String user) async {
+    if (route.isEmpty || index < 0 || !_routeBusTimings.containsKey(route)) return;
+
+    String oldTime = _routeBusTimings[route]![index];
+
     try {
       await _firebaseService.updateBusTiming(route, oldTime, newTime, user);
+      _routeBusTimings[route]![index] = newTime;
+      _routeBusTimings[route]!.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
+
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error editing bus timing: $e');
-      return;
+      debugPrint('🔥 Error editing bus timing: $e');
     }
-
-    _busTimings[index] = newTime;
-    _busTimings.sort((a, b) => stringToDate(a).compareTo(stringToDate(b)));
-
-    notifyListeners();
   }
 }
