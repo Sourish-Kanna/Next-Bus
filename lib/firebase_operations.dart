@@ -14,7 +14,7 @@ class FirestoreService {
 
   /// **Logs user activities in the "logs" collection**
   Future<void> _logActivity(String action, String userId, String description) async {
-    final logRef = _firestore.collection('activityLogs').doc("${action}_$userId");
+    final logRef = _firestore.collection('activityLogs').doc("$action by $userId");
     await logRef.set({
       'action': action,
       'userId': userId,
@@ -81,10 +81,10 @@ class FirestoreService {
       }
     }).then((_) async {
       // ✅ Logging after transaction completes
-      await _logActivity("Added Route", userId, "Route: $routeName with stops: ${stops.join(', ')}");
+      await _logActivity("Added Route $routeName", userId, "Route: $routeName with stops: ${stops.join(', ')}");
     }).catchError((error) {
       // ❌ Handle errors properly
-      print("Failed to add route: $error");
+      debugPrint("Failed to add route: $error");
     });
   }
 
@@ -105,7 +105,10 @@ class FirestoreService {
       }
 
     }).then((_) async {
-      await _logActivity("Removed Route", userId, "Route: $routeName deleted");
+      await _logActivity("Removed Route $routeName", userId, "Route: $routeName deleted");
+    }).catchError((error) {
+      // ❌ Handle errors properly
+      debugPrint("Failed to remove route: $error");
     });
   }
 
@@ -132,7 +135,10 @@ class FirestoreService {
       });
 
     }).then((_) async {
-      await _logActivity("Added Bus Timing", userId, "Added $time to route: $routeName");
+      await _logActivity("Added Bus Timing for $routeName", userId, "Added $time to route: $routeName");
+    }).catchError((error) {
+      // ❌ Handle errors properly
+      debugPrint("Failed to add time: $error");
     });
   }
 
@@ -159,7 +165,10 @@ class FirestoreService {
       });
 
     }).then((_) async {
-      await _logActivity("Deleted Bus Timing", userId, "Removed $time from route: $routeName");
+      await _logActivity("Deleted Bus Timing for $routeName", userId, "Removed $time from route: $routeName");
+    }).catchError((error) {
+      // ❌ Handle errors properly
+      debugPrint("Failed to remove time: $error");
     });
   }
 
@@ -188,7 +197,10 @@ class FirestoreService {
       });
 
     }).then((_) async {
-      await _logActivity("Updated Bus Timing", userId, "Changed $oldTime to $newTime on route: $routeName");
+      await _logActivity("Updated Bus Timing for $routeName", userId, "Changed $oldTime to $newTime on route: $routeName");
+    }).catchError((error) {
+      // ❌ Handle errors properly
+      debugPrint("Failed to update time: $error");
     });
   }
 

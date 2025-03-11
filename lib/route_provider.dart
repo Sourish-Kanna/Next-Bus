@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Route Provider with String-based Route Persistence
 class RouteProvider with ChangeNotifier {
-  String _route = "102"; // Default route as String
+  String _route = "56"; // Default route as String
 
   String get route => _route;
 
