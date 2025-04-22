@@ -28,7 +28,7 @@ class AuthService with ChangeNotifier {
   /// 🔹 Google Sign-In (Web & Mobile)
   Future<User?> signInWithGoogle() async {
     try {
-      debugPrint("Hello0");
+      // debugPrint("Hello0");
       UserCredential userCredential;
       if (kIsWeb) {
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
@@ -36,7 +36,7 @@ class AuthService with ChangeNotifier {
       } else {
         final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
         if (googleUser == null) return null; // User canceled sign-in
-        debugPrint("Hello1");
+        // debugPrint("Hello1");
 
         final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -45,14 +45,14 @@ class AuthService with ChangeNotifier {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        debugPrint("Hello2");
+        // debugPrint("Hello2");
 
         userCredential = await _auth.signInWithCredential(credential);
       }
 
       _user = userCredential.user;
       notifyListeners();
-      debugPrint("Hello3");
+      // debugPrint("Hello3");
       debugPrint("Google Sign-In Successful: ${_user?.email}");
       return _user;
     } catch (e) {
