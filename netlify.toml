@@ -1,4 +1,5 @@
 [[redirects]]
-from = "/*"
-to = "/index.html"
+from = "https://next-bus-app.netlify.app/*"
+to = "https://next-bus-app.vercel.app/"
 status = 200
+force = true
