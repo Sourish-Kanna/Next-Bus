@@ -141,7 +141,7 @@ class AddTime extends StatelessWidget {
         String newTime = dateToString(DateTime.now()); // Generate a new time entry
         await Provider.of<BusTimingList>(context, listen: false).addBusTiming(route, newTime, userId);
 
-        allSnackBar(
+        customSnackBar(
           context,
           "Time Added for Route $route",
           onUndo: () {
