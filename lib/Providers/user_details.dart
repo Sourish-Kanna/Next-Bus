@@ -1,0 +1,1 @@
+// for checking if user is admin, logged in, guest
