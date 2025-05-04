@@ -1,14 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:nextbus/auth.dart';
 import 'package:provider/provider.dart';
-import 'package:nextbus/bus_timing_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:nextbus/Providers/auth_provider.dart';
+import 'package:nextbus/Providers/bus_timing_provider.dart';
 import 'package:nextbus/firebase_options.dart';
-import 'package:nextbus/route_provider.dart';
-import 'package:nextbus/build_pages.dart';
+import 'package:nextbus/Providers/route_provider.dart';
+import 'package:nextbus/Pages/view_entries.dart';
+import 'package:nextbus/Pages/login.dart';
+import 'package:nextbus/Pages/route_selection.dart';
+import 'package:nextbus/Pages/error_screen.dart';
+import 'package:nextbus/Pages/home_page.dart';
 
 // Define application routes
 final Map<String, WidgetBuilder> routes = {

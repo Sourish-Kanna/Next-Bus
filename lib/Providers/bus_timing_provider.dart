@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:nextbus/firebase_operations.dart';
+import 'package:nextbus/Providers/firebase_operations.dart';
 
 String dateToString(DateTime time) {
   return DateFormat('h:mm a').format(time);
