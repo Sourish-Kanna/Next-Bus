@@ -5,10 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:nextbus/Providers/auth_provider.dart';
-import 'package:nextbus/Providers/bus_timing_provider.dart';
+import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/Providers/bus_timing.dart';
 import 'package:nextbus/firebase_options.dart';
-import 'package:nextbus/Providers/route_provider.dart';
+import 'package:nextbus/Providers/route.dart';
 import 'package:nextbus/Pages/view_entries.dart';
 import 'package:nextbus/Pages/login.dart';
 import 'package:nextbus/Pages/route_selection.dart';

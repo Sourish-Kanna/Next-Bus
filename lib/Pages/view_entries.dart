@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nextbus/Pages/view_entries_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:nextbus/Providers/auth_provider.dart';
-import 'package:nextbus/Providers/route_provider.dart';
+import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/Providers/route.dart';
 import 'package:provider/provider.dart';
 
 class EntriesPage extends StatelessWidget {

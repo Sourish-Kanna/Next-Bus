@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nextbus/Pages/home_page_helper.dart';
 import 'package:nextbus/Providers/firebase_operations.dart';
-import 'package:nextbus/Providers/auth_provider.dart';
-import 'package:nextbus/Providers/route_provider.dart';
-import 'package:nextbus/Providers/bus_timing_provider.dart';
+import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/Providers/route.dart';
+import 'package:nextbus/Providers/bus_timing.dart';
 import 'package:nextbus/Pages/login.dart';
 import 'package:nextbus/common.dart';
 
