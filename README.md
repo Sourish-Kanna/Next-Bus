@@ -2,7 +2,7 @@
 
 **Next Bus** is a dynamic Flutter application designed to provide real-time bus timings and manage routes effectively. It integrates Firebase for database operations and uses Provider for state management. This app offers a clean, responsive UI and ensures ease of use with features like dynamic theming and admin operations.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/777b9eb4-079a-464c-8b70-982df4a55b06/deploy-status)](https://app.netlify.com/sites/next-bus-app/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/736ced60-11c2-47e4-a24d-5d7e7c26c7c0/deploy-status)](https://app.netlify.com/projects/next-bus-app/deploys)
 
 ## Features ✨
 
