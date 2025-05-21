@@ -4,6 +4,7 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/736ced60-11c2-47e4-a24d-5d7e7c26c7c0/deploy-status)](https://app.netlify.com/sites/next-bus-app/deploys)
 
+
 ## Features ✨
 
 ### User Features
