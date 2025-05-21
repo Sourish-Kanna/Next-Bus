@@ -5,15 +5,10 @@ import 'package:provider/provider.dart' show ChangeNotifierProvider, MultiProvid
 import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, User;
 
-import 'package:nextbus/Providers/authentication.dart';
-import 'package:nextbus/Providers/bus_timing.dart';
+import 'package:nextbus/Providers/providers.dart';
 import 'package:nextbus/firebase_options.dart';
-import 'package:nextbus/Providers/route.dart';
-import 'package:nextbus/Pages/view_entries.dart';
-import 'package:nextbus/Pages/login.dart';
-import 'package:nextbus/Pages/route_selection.dart';
-import 'package:nextbus/Pages/error_screen.dart';
-import 'package:nextbus/Pages/home_page.dart';
+import 'package:nextbus/Pages/pages.dart';
+
 
 // Define application routes
 final Map<String, WidgetBuilder> routes = {
