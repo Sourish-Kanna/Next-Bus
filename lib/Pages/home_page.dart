@@ -22,28 +22,28 @@ class BusHomePage extends StatelessWidget {
       isAdmin = !user.isAnonymous;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Consumer<RouteProvider>(
-          builder: (context, routeProvider, child) {
-            return Text('Route ${routeProvider.route}');
-          },),
-        actions: [
-          if (user != null)
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await authService.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AuthScreen()),
-                );
-              },
-            ),
-        ],
-      ),
-      body: Padding(
+    return Container(
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: Consumer<RouteProvider>(
+      //     builder: (context, routeProvider, child) {
+      //       return Text('Route ${routeProvider.route}');
+      //     },),
+      //   actions: [
+      //     if (user != null)
+      //       IconButton(
+      //         icon: const Icon(Icons.logout),
+      //         onPressed: () async {
+      //           await authService.signOut();
+      //           Navigator.pushReplacement(
+      //             context,
+      //             MaterialPageRoute(builder: (context) => const AuthScreen()),
+      //           );
+      //         },
+      //       ),
+      //   ],
+      // ),
+      child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +84,7 @@ class BusHomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: isAdmin ? adminFAB(context, user) : null,
+      // floatingActionButton: isAdmin ? adminFAB(context, user) : null,
     );
   }
 }

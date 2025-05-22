@@ -21,12 +21,12 @@ class EntriesPage extends StatelessWidget {
     String route = routeProvider.route;
     String userId = user?.uid ?? "guest"; // Use "guest" if the user is not logged in
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Entries'),
-      ),
-      body: Padding(
+    return Container(
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: const Text('Entries'),
+      // ),
+      child: Padding(
         padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

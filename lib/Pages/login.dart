@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nextbus/Providers/authentication.dart';
 import 'package:nextbus/Pages/home_page.dart';
+import 'package:nextbus/common.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -11,7 +12,7 @@ class AuthScreen extends StatelessWidget {
     final AuthService authService = AuthService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Next Bus Login")),
+      appBar: AppBar(title: const Text("Next Bus Login"),),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -24,7 +25,7 @@ class AuthScreen extends StatelessWidget {
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => BusHomePage()),
+                    MaterialPageRoute(builder: (context) => AppLayout(selectedIndex: 0, child: Center(child: BusHomePage()))),
                   );
                 }
               },
@@ -38,7 +39,7 @@ class AuthScreen extends StatelessWidget {
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => BusHomePage()),
+                    MaterialPageRoute(builder: (context) => AppLayout(selectedIndex: 0, child: Center(child: BusHomePage()))),
                   );
                 }
               },
