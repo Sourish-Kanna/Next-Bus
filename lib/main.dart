@@ -8,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, User;
 import 'package:nextbus/Providers/providers.dart';
 import 'package:nextbus/firebase_options.dart';
 import 'package:nextbus/Pages/pages.dart';
-import 'package:nextbus/common.dart';
+import 'package:nextbus/app_layout.dart';
 
 
 // Define application routes
