@@ -21,6 +21,7 @@ const List<_NavItem> _NavDrawerItems = [
   _NavItem('Home', Icons.home, '/home'),
   _NavItem('Route', Icons.route, '/route'),
   _NavItem('Entries', Icons.bookmark, '/entries'),
+  _NavItem('Admin', Icons.settings, '/admin')
   // _NavItem('Logout', Icons.logout_rounded, '/login')
   // _NavItem('Quote', Icons.format_quote, '/route'),
 ];

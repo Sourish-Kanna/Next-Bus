@@ -5,6 +5,7 @@ import 'package:nextbus/Providers/firebase_operations.dart';
 import 'package:nextbus/Providers/route.dart';
 import 'package:nextbus/Providers/bus_timing.dart';
 import 'package:nextbus/common.dart';
+import 'package:nextbus/Providers/authentication.dart';
 
 
 void _showAdminOptionsDialog(BuildContext context, User? user) {
@@ -283,10 +284,28 @@ void _showAdminOptionsDialog(BuildContext context, User? user) {
   );
 }
 
-FloatingActionButton adminFAB(BuildContext context, User? user) {
-  return FloatingActionButton(
+MaterialButton adminFAB(BuildContext context, User? user) {
+  bool isAdmin = false;
+  if (user != null) {
+    isAdmin = !user.isAnonymous;
+  }
+  return MaterialButton(
     onPressed: () => _showAdminOptionsDialog(context, user),
-    tooltip: 'Admin Options',
-    child: const Icon(Icons.settings_suggest),
+
+    child: Row(children: [
+      const Icon(Icons.settings_suggest),
+      Text('Admin Options'),
+    ]),
   );
+}
+
+class adminPage extends StatelessWidget {
+  adminPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final User? user = authService.user;
+    return adminFAB(context, user);
+  }
 }

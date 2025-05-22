@@ -17,6 +17,7 @@ final Map<String, WidgetBuilder> routes = {
   '/route': (context) => AppLayout(selectedIndex: 1, child: RouteSelect()),
   '/entries': (context) => AppLayout(selectedIndex: 2, child: EntriesPage()),
   '/home': (context) => AppLayout(selectedIndex: 0, child: BusHomePage()),
+  '/admin': (context) => AppLayout(selectedIndex: 0, child: adminPage()),
 };
 
 void main() async {
