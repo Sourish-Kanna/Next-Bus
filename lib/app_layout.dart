@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/common.dart';
+
 
 class _NavItem {
   final String label;
@@ -57,12 +57,6 @@ void _onDestinationSelected(BuildContext context, int index) {
     Navigator.pushNamed(context, route);
   }
 }
-void logoutUser(BuildContext context) async {
-  final authService = Provider.of<AuthService>(context);
-  await authService.signOut();
-  if (!context.mounted) return;
-  Navigator.pushReplacementNamed(context, '/login');
-}
 
 Widget _buildNavigation(BuildContext context, bool isWide, bool isDrawer, int selectedIndex) {
   if (isDrawer) {
@@ -73,7 +67,7 @@ Widget _buildNavigation(BuildContext context, bool isWide, bool isDrawer, int se
       children: [
         ...navDrawerDestinations,
         const Divider(),
-        buildLogoutButton(context, () => logoutUser(context)),
+        logoutButton(context, () => logoutUser(context)),
       ],
     );
   } else if (isWide) {
@@ -88,7 +82,7 @@ Widget _buildNavigation(BuildContext context, bool isWide, bool isDrawer, int se
         label: Text(item.label),
       ))
           .toList(),
-      trailing: buildLogoutButton(context, () => logoutUser(context)),
+      trailing: logoutButton(context, () => logoutUser(context)),
     );
   } else {
     return NavigationBar(
@@ -100,10 +94,11 @@ Widget _buildNavigation(BuildContext context, bool isWide, bool isDrawer, int se
         label: item.label,
       ))
           .toList(),
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
     );
   }
 }
-Widget buildLogoutButton(BuildContext context, VoidCallback logoutUser) {
+Widget logoutButton(BuildContext context, VoidCallback logoutUser) {
   return Padding(
     padding: const EdgeInsets.all(12.0),
     child: ElevatedButton.icon(

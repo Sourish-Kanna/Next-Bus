@@ -28,3 +28,10 @@ void customSnackBar(BuildContext context, String text, {VoidCallback? onUndo}) {
   );
   HapticFeedback.lightImpact();
 }
+
+void logoutUser(BuildContext context) async {
+  final authService = Provider.of<AuthService>(context, listen: false);
+  await authService.signOut();
+  if (!context.mounted) return;
+  Navigator.pushReplacementNamed(context, '/login');
+}

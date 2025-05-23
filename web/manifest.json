@@ -1,6 +1,6 @@
 {
-    "name": "next_bus",
-    "short_name": "next_bus",
+    "name": "Next Bus",
+    "short_name": "NextBus",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

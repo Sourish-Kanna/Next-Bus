@@ -6,6 +6,7 @@ import 'package:nextbus/Providers/route.dart';
 import 'package:nextbus/Providers/bus_timing.dart';
 import 'package:nextbus/common.dart';
 import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/app_layout.dart';
 
 
 void _showAdminOptionsDialog(BuildContext context, User? user) {
@@ -284,28 +285,35 @@ void _showAdminOptionsDialog(BuildContext context, User? user) {
   );
 }
 
-MaterialButton adminFAB(BuildContext context, User? user) {
-  bool isAdmin = false;
-  if (user != null) {
-    isAdmin = !user.isAnonymous;
-  }
-  return MaterialButton(
-    onPressed: () => _showAdminOptionsDialog(context, user),
-
-    child: Row(children: [
-      const Icon(Icons.settings_suggest),
-      Text('Admin Options'),
-    ]),
+Widget adminFAB(BuildContext context, User? user) {
+  bool isAdmin = true;
+  // if (user != null) {
+  //   isAdmin = !user.isAnonymous;
+  // }
+  return Visibility(
+    visible: isAdmin, // Only show if the user is an admin
+    child: ElevatedButton.icon(
+      onPressed: () => _showAdminOptionsDialog(context, user),
+      icon: const Icon(Icons.settings_suggest),
+      label: const Text('Admin Options'),
+    ),
   );
 }
 
-class adminPage extends StatelessWidget {
-  adminPage({super.key});
+class AdminPage extends StatelessWidget {
+  const AdminPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
     final User? user = authService.user;
-    return adminFAB(context, user);
+    return Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              adminFAB(context, user),
+              logoutButton(context, () => logoutUser(context))]
+        )
+    );
   }
 }

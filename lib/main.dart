@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Brightness, DeviceOrientation, SystemChrome;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:dynamic_color/dynamic_color.dart' show ColorSchemeHarmonization, DynamicColorBuilder;
 import 'package:provider/provider.dart' show ChangeNotifierProvider, MultiProvider;
 import 'package:firebase_core/firebase_core.dart' show Firebase;
@@ -17,7 +18,7 @@ final Map<String, WidgetBuilder> routes = {
   '/route': (context) => AppLayout(selectedIndex: 1, child: RouteSelect()),
   '/entries': (context) => AppLayout(selectedIndex: 2, child: EntriesPage()),
   '/home': (context) => AppLayout(selectedIndex: 0, child: BusHomePage()),
-  '/admin': (context) => AppLayout(selectedIndex: 0, child: adminPage()),
+  '/admin': (context) => AppLayout(selectedIndex: 0, child: AdminPage()),
 };
 
 final List<MaterialColor> seedColorList = [
@@ -28,11 +29,13 @@ final List<MaterialColor> seedColorList = [
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set app orientation to portrait mode only
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Set app orientation to portrait mode only if platform is Android
+  if (TargetPlatform.android == defaultTargetPlatform) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   try {
     await Firebase.initializeApp(
