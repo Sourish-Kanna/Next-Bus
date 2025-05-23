@@ -1,86 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:nextbus/bus_timing_provider.dart';
+import 'package:nextbus/Providers/bus_timing.dart';
 import 'package:provider/provider.dart';
-import 'package:nextbus/auth.dart';
+import 'package:nextbus/Providers/authentication.dart';
+import 'package:nextbus/common.dart';
 
-// Haptic feedback for user actions
-void provideHapticFeedback() {
-  HapticFeedback.lightImpact();
-}
-
-// SnackBar widget with optional undo action
-void allSnackBar(BuildContext context, String text, {VoidCallback? onUndo}) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.95),
-      behavior: SnackBarBehavior.floating,
-      content: Text(
-        text,
-        style: TextStyle(
-          fontSize: 16,
-          color: Theme.of(context).colorScheme.onInverseSurface,
-        ),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30.0),
-      ),
-      action: onUndo != null
-          ? SnackBarAction(
-        label: "Undo",
-        onPressed: onUndo,
-      )
-          : null,
-      duration: const Duration(seconds: 3),
-    ),
-  );
-  provideHapticFeedback();
-}
-
-// NextTime widget - Displays the next available bus
-class NextTime extends StatelessWidget {
-  final String route;
-  const NextTime({super.key, required this.route});
-
-  String getNextBus(BusTimingList provider) {
-    DateTime now = dateToFormat(DateTime.now());
-    return provider.getBusTimings(route).firstWhere(
-          (time) => now.isBefore(stringToDate(time)),
-      orElse: () => "No buses",
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<BusTimingList>(
-      builder: (context, provider, child) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Next Bus at:",
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Text(
-              getNextBus(provider),
-              style: TextStyle(
-                fontSize: 42,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
 
 // ListDisplay widget - Displays all bus timings with edit & delete actions
 class ListDisplay extends StatelessWidget {
@@ -216,7 +141,7 @@ class AddTime extends StatelessWidget {
         String newTime = dateToString(DateTime.now()); // Generate a new time entry
         await Provider.of<BusTimingList>(context, listen: false).addBusTiming(route, newTime, userId);
 
-        allSnackBar(
+        customSnackBar(
           context,
           "Time Added for Route $route",
           onUndo: () {
@@ -232,52 +157,3 @@ class AddTime extends StatelessWidget {
   }
 }
 
-// ListHome widget - Displays a list of bus timings for a given route
-class ListHome extends StatelessWidget {
-  final String title;
-  final bool isPast;
-  final String route; // Added route parameter
-
-  const ListHome({super.key, required this.title, required this.isPast, required this.route});
-
-  @override
-  Widget build(BuildContext context) {
-    DateTime nowtime = dateToFormat(DateTime.now());
-
-    return Consumer<BusTimingList>(
-      builder: (context, provider, child) {
-        List<String> timings = provider.getBusTimings(route)
-            .where((time) => isPast ? stringToDate(time).isBefore(nowtime) : stringToDate(time).isAfter(nowtime))
-            .toList();
-
-        if (isPast) timings = List.from(timings.reversed);
-
-        return Expanded(
-          child: ListView.builder(
-            itemCount: timings.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  title: Center(
-                    child: Text(
-                      timings[index],
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
