@@ -20,6 +20,11 @@ final Map<String, WidgetBuilder> routes = {
   '/admin': (context) => AppLayout(selectedIndex: 0, child: adminPage()),
 };
 
+final List<MaterialColor> seedColorList = [
+  Colors.deepPurple,
+  Colors.deepOrange
+];
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -59,10 +64,10 @@ class NextBusApp extends StatelessWidget {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         final lightScheme = lightDynamic?.harmonized() ??
-            ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+            ColorScheme.fromSeed(seedColor: seedColorList[1]);
         final darkScheme = darkDynamic?.harmonized() ??
             ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
+              seedColor: seedColorList[1],
               brightness: Brightness.dark,
             );
 

@@ -2,137 +2,116 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nextbus/Providers/authentication.dart';
 
-// Nav Items and Submenus
 class _NavItem {
   final String label;
   final IconData icon;
   final String? route;
-  final List<_SubNavItem> submenus;
-  const _NavItem(this.label, this.icon, this.route, [this.submenus = const []]);
+  const _NavItem(this.label, this.icon, this.route,);
 }
 
-class _SubNavItem {
-  final String label;
-  final String route;
-  const _SubNavItem(this.label, this.route);
-}
-
-const List<_NavItem> _NavDrawerItems = [
+final List<_NavItem> _navItems = [
   _NavItem('Home', Icons.home, '/home'),
   _NavItem('Route', Icons.route, '/route'),
   _NavItem('Entries', Icons.bookmark, '/entries'),
   _NavItem('Admin', Icons.settings, '/admin')
 ];
+final List<Widget> navDrawerDestinations = _navItems.map((item) =>
+    NavigationDrawerDestination(icon: Icon(item.icon), label: Text(item.label),)
+).toList();
 
-const List<_NavItem> _NavBarItems = [
-  _NavItem('Home', Icons.home, '/home'),
-  _NavItem('Route', Icons.route, '/route'),
-  _NavItem('Entries', Icons.bookmark, '/entries'),
-  _NavItem('Admin', Icons.settings, '/admin'),
-];
-
-
-// Shared App Layout
-class AppLayout extends StatelessWidget {
+class AppLayout extends StatefulWidget {
   final int selectedIndex;
   final Widget child;
+
   const AppLayout({super.key, required this.selectedIndex, required this.child});
 
   @override
+  State<AppLayout> createState() => _AppLayoutState();
+}
+class _AppLayoutState extends State<AppLayout> {
+
+  @override
   Widget build(BuildContext context) {
-    final currentItem = _NavDrawerItems[selectedIndex];
+    final width = MediaQuery.of(context).size.width;
+    final isWide = width >= 600;
+    final isDrawer = width >= 1024;
+
+    final navWidget = _buildNavigation(context, isWide, isDrawer, widget.selectedIndex);
+
     return Scaffold(
-      appBar: AppBar(title: Text(currentItem.label)),
-      drawer: NavDrawer(selectedIndex: selectedIndex),
-      body: child,
-      bottomNavigationBar: AppBottomNavigationBar(selectedIndex: selectedIndex),
-    );
-  }
-}
-
-class NavDrawer extends StatelessWidget {
-  final int selectedIndex;
-  const NavDrawer({super.key, required this.selectedIndex});
-
-  void _navigate(BuildContext context, String route) {
-    Navigator.pop(context);
-    if (ModalRoute.of(context)?.settings.name != route) {
-      if (route == '/login') { Navigator.pushReplacementNamed(context, route);}
-      else { Navigator.pushNamed(context, route);}
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-    return Drawer(
-      child: SafeArea(
-        child: ListView(
-          // padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              child: Text('App Navigation', style: TextStyle(fontSize: 20)),
-            ),
-            ..._NavDrawerItems.map((item) {
-              if (item.submenus.isEmpty) {
-                return ListTile(
-                  leading: Icon(item.icon),
-                  title: Text(item.label),
-                  selected: selectedIndex == _NavDrawerItems.indexOf(item),
-                  onTap: () => _navigate(context, item.route!),
-                );
-              } else {
-                return ExpansionTile(
-                  leading: Icon(item.icon),
-                  title: Text(item.label),
-                  children: item.submenus.map((sub) {
-                    return ListTile(
-                      contentPadding: const EdgeInsets.only(left: 72),
-                      title: Text(sub.label),
-                      onTap: () => _navigate(context, sub.route),
-                    );
-                  }).toList(),
-                );
-              }
-            }),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text("Logout"),
-              onTap: () async {
-                await authService.signOut();
-                _navigate(context, '/login');
-              },
-            ),
-          ],
-        ),
+      body: Row(
+        children: [
+          if (isWide) navWidget,
+          Expanded(child: SafeArea(child: widget.child),),
+        ],
       ),
+      bottomNavigationBar: !isWide ? navWidget : null,
     );
   }
 }
 
-// Bottom Navigation Bar
-class AppBottomNavigationBar extends StatelessWidget {
-  final int selectedIndex;
-  const AppBottomNavigationBar({super.key, required this.selectedIndex});
 
-  @override
-  Widget build(BuildContext context) {
+void _onDestinationSelected(BuildContext context, int index) {
+  final route = _navItems[index].route;
+  if (route != null && ModalRoute.of(context)?.settings.name != route) {
+    Navigator.pushNamed(context, route);
+  }
+}
+void logoutUser(BuildContext context) async {
+  final authService = Provider.of<AuthService>(context);
+  await authService.signOut();
+  if (!context.mounted) return;
+  Navigator.pushReplacementNamed(context, '/login');
+}
+
+Widget _buildNavigation(BuildContext context, bool isWide, bool isDrawer, int selectedIndex) {
+  if (isDrawer) {
+    return NavigationDrawer(
+      selectedIndex: selectedIndex,
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+      onDestinationSelected: (index) => _onDestinationSelected(context, index),
+      children: [
+        ...navDrawerDestinations,
+        const Divider(),
+        buildLogoutButton(context, () => logoutUser(context)),
+      ],
+    );
+  } else if (isWide) {
+    return NavigationRail(
+      selectedIndex: selectedIndex,
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+      onDestinationSelected: (index) => _onDestinationSelected(context, index),
+      labelType: NavigationRailLabelType.all,
+      destinations: _navItems
+          .map((item) => NavigationRailDestination(
+        icon: Icon(item.icon),
+        label: Text(item.label),
+      ))
+          .toList(),
+      trailing: buildLogoutButton(context, () => logoutUser(context)),
+    );
+  } else {
     return NavigationBar(
       selectedIndex: selectedIndex,
-      destinations: _NavBarItems
-          .where((item) => item.route != null)
+      onDestinationSelected: (index) => _onDestinationSelected(context, index),
+      destinations: _navItems
           .map((item) => NavigationDestination(
         icon: Icon(item.icon),
         label: item.label,
       ))
           .toList(),
-      onDestinationSelected: (index) {
-        final route = _NavBarItems.where((item) => item.route != null).toList()[index].route;
-        if (route != null && ModalRoute.of(context)?.settings.name != route) {
-          Navigator.pushNamed(context, route);
-        }
-      },
     );
   }
+}
+Widget buildLogoutButton(BuildContext context, VoidCallback logoutUser) {
+  return Padding(
+    padding: const EdgeInsets.all(12.0),
+    child: ElevatedButton.icon(
+      onPressed: () {logoutUser();},
+      icon: Icon(
+        Icons.logout,
+      ),
+      label: Text("Logout"),
+    ),
+  );
 }
