@@ -70,7 +70,7 @@ class _RouteSelectState extends State<RouteSelect> {
     return Scaffold(
       appBar: AppBar(
           title: const Text(
-            'Select a Route',
+            'Select a TMT Bus Route',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -100,7 +100,7 @@ class _RouteSelectState extends State<RouteSelect> {
                           final isSelected = selectedRoute == routeItem;
 
                           return ListTile(
-                            title: Text('Route $routeItem'),
+                            title: Text('$routeItem'),
                             leading: Icon(
                               Icons.directions_bus,
                               color: isSelected
