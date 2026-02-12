@@ -20,8 +20,10 @@ class UserDetails with ChangeNotifier {
   Future<void> fetchUserDetails() async {
     // 1. LOAD FROM CACHE FIRST
     // This gives immediate UI feedback (e.g. shows Admin Dashboard) even before the API returns.
-    await _loadFromCache();
-    notifyListeners();
+    if (await _loadFromCache() == true){
+      notifyListeners();
+      return;
+    }
 
     ApiService api = ApiService();
     try {
@@ -31,7 +33,7 @@ class UserDetails with ChangeNotifier {
 
       if (result.data != null && result.data["data"] != null) {
         Map<String, dynamic> data = result.data["data"];
-        AppLogger.info("User Details fetched from API: $data");
+        // AppLogger.info("User Details fetched from API: $data");
 
         // Update local state with fresh data from server
         _isAdmin = data["isAdmin"] ?? false;
@@ -55,7 +57,7 @@ class UserDetails with ChangeNotifier {
   }
 
   /// Loads the last known user state from device storage (SharedPreferences)
-  Future<void> _loadFromCache() async {
+  Future<bool> _loadFromCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       // Only load if keys exist, otherwise stick to default Guest
@@ -65,8 +67,10 @@ class UserDetails with ChangeNotifier {
         _isGuest = prefs.getBool('user_isGuest') ?? true;
         AppLogger.info("Loaded User from Cache: Admin=$_isAdmin, Guest=$_isGuest");
       }
+      return true;
     } catch (e) {
       AppLogger.warn("Failed to load user cache: $e");
+      return false;
     }
   }
 

@@ -42,6 +42,7 @@ class TimetableProvider with ChangeNotifier {
       } catch (e) {
         AppLogger.warn("Failed to parse cached timetable for $route");
       }
+      return ;
     }
 
     // 3. NETWORK LAYER: Fetch fresh data in the background

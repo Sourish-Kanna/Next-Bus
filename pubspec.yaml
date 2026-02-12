@@ -2,7 +2,7 @@ name: nextbus
 description: "An App to store bus timing and to show when next bus will come"
 publish_to: 'none' # Prevents accidental publishing to pub.dev
 
-version: 2.1.5-beta
+version: 2.1.6-beta
 
 environment:
   sdk: ">=3.10.0 <4.0.0"

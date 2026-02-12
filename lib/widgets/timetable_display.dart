@@ -140,6 +140,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
     return SizedBox(
       height: _itemHeight,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildTimeline(departed, isLast, colors),
           const SizedBox(width: 16),
