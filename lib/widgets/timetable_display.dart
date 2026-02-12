@@ -160,7 +160,12 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
             shape: BoxShape.circle,
           ),
         ),
-        if (!isLast) Expanded(child: Container(width: 2, color: colors.surfaceContainerHighest)),
+        if (!isLast) Expanded(
+            child: Container(
+                width: 2,
+                color: colors.outlineVariant
+            )
+        ),
       ],
     );
   }
