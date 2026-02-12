@@ -41,7 +41,7 @@ class ThemeProvider with ChangeNotifier {
       null; // If dynamic, no specific seed color is selected
     } else if (_selectedSeedColor == null && seedColorList.isNotEmpty) {
       // If turning off dynamic and no color was previously selected, default to first
-      _selectedSeedColor = seedColorList[0];
+      _selectedSeedColor = fallbackColor;
     }
     _saveThemeSettings();
     notifyListeners();
@@ -65,7 +65,7 @@ class ThemeProvider with ChangeNotifier {
       _selectedSeedColor = seedColorList[seedColorIndex];
     } else if (!_isDynamicColor && seedColorList.isNotEmpty) {
       // Fallback if saved index is invalid or no dynamic color
-      _selectedSeedColor = seedColorList[0];
+      _selectedSeedColor = fallbackColor;
     } else {
       _selectedSeedColor = null; // Dynamic color is active
     }
