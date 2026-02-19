@@ -28,6 +28,7 @@ class AppLayout extends StatefulWidget {
 
 class _AppLayoutState extends State<AppLayout> {
   bool _isInit = true; // Flag to ensure fetch only runs once
+  static bool _isDialogShowing = false;
 
   // Fetch user data once
   @override
@@ -49,10 +50,16 @@ class _AppLayoutState extends State<AppLayout> {
   }
 
   Future<void> _showDisclaimerDialog() async {
+    if (_isDialogShowing) return;
+    _isDialogShowing = true;
+
     final prefs = await SharedPreferences.getInstance();
     final shown = prefs.getBool('hasShownDisclaimer') ?? false;
 
-    if (shown || !mounted) return;
+    if (shown || !mounted) {
+      _isDialogShowing = false;
+      return;
+    }
 
     showDialog(
       context: context,
