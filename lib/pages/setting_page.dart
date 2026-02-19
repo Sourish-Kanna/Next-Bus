@@ -111,10 +111,11 @@ class SettingPage extends StatelessWidget {
 
     final user = context.watch<AuthService>().user;
     final isOnline = context.watch<ConnectivityProvider>().isOnline;
-    final String initials = user?.displayName?.trim().isNotEmpty ?? false
-        ? user!.displayName!.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
-        : "GU";
+    final String initials = user?.displayName?.trim().isNotEmpty ?? false // checks if display name is there or not
+        ? user!.displayName!.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase() // If yes
+        : "GU"; // If no (GU => Guest User)
     final accessLevel = context.watch<UserDetails>().accessLevel;
+    final String message = "${user?.email ?? "Signed in as Guest"} \n($accessLevel)";
 
 
     return Scaffold(
@@ -141,6 +142,10 @@ class SettingPage extends StatelessWidget {
             children: [
               // 2. Display User Info if logged in
               if (user != null) ...[
+                // Tooltip(
+                //   message: message,
+                //   triggerMode: TooltipTriggerMode.longPress,
+                //   child: 
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                   leading: CircleAvatar(
@@ -163,11 +168,13 @@ class SettingPage extends StatelessWidget {
                     user.displayName ?? "Guest User",
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  isThreeLine: true,
                   subtitle: Text(
-                    "${user.email ?? "Signed in as Guest"} ($accessLevel)",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                      message,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  // ),
                 ),
                 // const Divider(height: 24), // Separator
               ],
