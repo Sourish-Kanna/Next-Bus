@@ -17,10 +17,10 @@ class UserDetails with ChangeNotifier {
 
   /// Main function to get user data.
   /// Strategy: Load Cache (Instant) -> Fetch API (Background) -> Update Cache
-  Future<void> fetchUserDetails() async {
-    // 1. LOAD FROM CACHE FIRST
+  Future<void> fetchUserDetails({bool isInit = false}) async {
+    // 1. LOAD FROM CACHE FIRST IF AVAILABLE AND NOT INITIALIZING
     // This gives immediate UI feedback (e.g. shows Admin Dashboard) even before the API returns.
-    if (await _loadFromCache() == true){
+    if (await _loadFromCache() == true && !isInit){
       notifyListeners();
       return;
     }
