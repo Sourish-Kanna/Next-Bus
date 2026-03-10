@@ -1,9 +1,9 @@
+import 'package:dynamic_color/dynamic_color.dart' show ColorHarmonization;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart' show Consumer, Provider;
 import 'package:nextbus/providers/providers.dart' show TimetableProvider, RouteProvider;
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:nextbus/constant.dart' show greenTime, orangeTime, redTime;
 
 class TimetableDisplay extends StatefulWidget {
   final String route;
@@ -71,31 +71,31 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
     }
   }
 
-  (String, Color) _getDelayInfo(num seconds, bool departed, ColorScheme colors) {
-    // Use absolute value for the display string to avoid "-1.5m early"
+  (String, Color) getDelayInfo(num seconds, bool departed, ColorScheme colors) {
+    // Use M3 Harmonization dynamically based on the current theme's primary
+    final Color earlyColor = Colors.green.harmonizeWith(colors.primary);
+    final Color lateColor = Colors.orange.harmonizeWith(colors.primary);
+    final Color vLateColor = colors.error; // Use the built-in M3 Error slot
+
     double minutes = (seconds / 60.0).abs();
-    String durationStr = minutes.toStringAsFixed(minutes < 1 ? 0 : 1); // 0.5 -> 0.5, but 0 -> 0
+    String durationStr = minutes.toStringAsFixed(minutes < 1 ? 0 : 1);
 
-    // 1. EARLY: More than 60 seconds early (seconds < -60)
-    if (seconds < -60) {
-      String label = "${durationStr}m early";
-      return (label, departed ? colors.outline : greenTime);
+    // Departed logic: use high-contrast text color with transparency
+    if (departed) {
+      return (_getLabel(seconds, durationStr), colors.outline);
     }
 
-    // 2. ON TIME: Within a 1-minute window (-60 to 60 seconds)
-    if (seconds <= 60) {
-      return ("On Time", departed ? colors.outline : greenTime);
-    }
+    // Active logic
+    if (seconds < -60) return ("${durationStr}m early", earlyColor);
+    if (seconds <= 60) return ("On Time", earlyColor);
+    if (seconds < 180) return ("${durationStr}m late", lateColor);
+    return ("${durationStr}m late", vLateColor);
+  }
 
-    // 3. LATE: More than 60 seconds late
-    String lateLabel = "${durationStr}m late";
-
-    if (seconds < 180) { // 1-3 minutes late
-      return (lateLabel, departed ? colors.outline : orangeTime);
-    }
-
-    // 4. VERY LATE: 3+ minutes late
-    return (lateLabel, departed ? colors.outline : redTime);
+  String _getLabel(num seconds, String duration) {
+    if (seconds < -60) return "${duration}m early";
+    if (seconds <= 60) return "On Time";
+    return "${duration}m late";
   }
 
   void resetScrollFlag() {
@@ -154,7 +154,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
     final actualIndex = (nowDividerIndex != -1 && index > nowDividerIndex) ? index - 1 : index;
     final entry = timetable[actualIndex];
     final bool departed = _isPast(entry['time']);
-    final (delayText, delayColor) = _getDelayInfo(entry['delay'] as num, departed, colors);
+    final (delayText, delayColor) = getDelayInfo(entry['delay'] as num, departed, colors);
     final bool isLast = actualIndex == timetable.length - 1;
 
     return SizedBox(
