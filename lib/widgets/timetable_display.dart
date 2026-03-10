@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart' show Consumer, Provider;
 import 'package:nextbus/providers/providers.dart' show TimetableProvider, RouteProvider;
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:nextbus/constant.dart' show greenTime, orangeTime, redTime;
 
 class TimetableDisplay extends StatefulWidget {
   final String route;
@@ -71,11 +72,30 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
   }
 
   (String, Color) _getDelayInfo(num seconds, bool departed, ColorScheme colors) {
-    if (departed) return ("Departed", colors.outline);
-    double minutes = seconds / 60.0;
-    if (seconds <= 0) return ("On Time", Colors.green.shade700);
-    if (seconds < 180) return ("${minutes.toStringAsFixed(1)}m late", Colors.orange.shade700);
-    return ("${minutes.toStringAsFixed(1)}m late", Colors.red.shade700);
+    // Use absolute value for the display string to avoid "-1.5m early"
+    double minutes = (seconds / 60.0).abs();
+    String durationStr = minutes.toStringAsFixed(minutes < 1 ? 0 : 1); // 0.5 -> 0.5, but 0 -> 0
+
+    // 1. EARLY: More than 60 seconds early (seconds < -60)
+    if (seconds < -60) {
+      String label = "${durationStr}m early";
+      return (label, departed ? colors.outline : greenTime);
+    }
+
+    // 2. ON TIME: Within a 1-minute window (-60 to 60 seconds)
+    if (seconds <= 60) {
+      return ("On Time", departed ? colors.outline : greenTime);
+    }
+
+    // 3. LATE: More than 60 seconds late
+    String lateLabel = "${durationStr}m late";
+
+    if (seconds < 180) { // 1-3 minutes late
+      return (lateLabel, departed ? colors.outline : orangeTime);
+    }
+
+    // 4. VERY LATE: 3+ minutes late
+    return (lateLabel, departed ? colors.outline : redTime);
   }
 
   void resetScrollFlag() {
@@ -176,7 +196,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: departed ? colors.surfaceContainerHighest.withValues(alpha: 0.3,) : colors.primaryContainer.withValues(alpha:0.7),
+          color: departed ? colors.primaryContainer.withValues(alpha: 0.4,) : colors.primaryContainer.withValues(alpha:0.7),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -187,17 +207,18 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(entry['time'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: departed ? colors.outline : colors.onPrimaryContainer)),
-                  // const SizedBox(height: 2),
-                  // Tooltip(
-                  //   message: entry['stop'],
-                  //   triggerMode: TooltipTriggerMode.longPress,
-                  //   child: Text(
-                  //     entry['stop'],
-                  //     maxLines: 1,
-                  //     overflow: TextOverflow.ellipsis,
-                  //     style: TextStyle(color: departed ? colors.outline : colors.onSurfaceVariant, fontSize: 13),
-                  //   ),
-                  // ),
+                  // Text(delayText, style: TextStyle(fontSize: 13, color: departed ? colors.outline : colors.onSurfaceVariant)),
+                  const SizedBox(height: 2),
+                  Tooltip(
+                    message: "${entry['time']} ($delayText)",
+                    triggerMode: TooltipTriggerMode.longPress,
+                    child: Text(
+                      delayText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: departed ? colors.outline : colors.onSurfaceVariant, fontSize: 13),
+                    ),
+                  ),
                 ],
               ),
             ),
