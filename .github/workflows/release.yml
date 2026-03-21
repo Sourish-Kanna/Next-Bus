@@ -2,7 +2,7 @@ name: Build, Release, and Deploy
 
 on:
   release:
-    types: [published]
+    types: [released]
 
 permissions:
   contents: read
