@@ -239,18 +239,18 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(entry['time'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: departed ? colors.outline : colors.onPrimaryContainer)),
-                  // Text(delayText, style: TextStyle(fontSize: 13, color: departed ? colors.outline : colors.onSurfaceVariant)),
                   const SizedBox(height: 2),
-                  Tooltip(
-                    message: "${entry['time']} ($delayText)",
-                    triggerMode: TooltipTriggerMode.longPress,
-                    child: Text(
-                      delayText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: departed ? colors.outline : colors.onSurfaceVariant, fontSize: 13),
-                    ),
-                  ),
+                  Text('No. of entries: ${entry['count']}', style: TextStyle(fontSize: 13, color: departed ? colors.outline : colors.onSurfaceVariant)),
+                  // Tooltip(
+                  //   message: "${entry['time']} ($delayText)",
+                  //   triggerMode: TooltipTriggerMode.longPress,
+                  //   child: Text(
+                  //     delayText,
+                  //     maxLines: 1,
+                  //     overflow: TextOverflow.ellipsis,
+                  //     style: TextStyle(color: departed ? colors.outline : colors.onSurfaceVariant, fontSize: 13),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
