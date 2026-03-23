@@ -100,7 +100,7 @@ class _RouteSelectState extends State<RouteSelect> {
                           final isSelected = selectedRoute == routeItem;
 
                           return ListTile(
-                            title: Text('$routeItem'),
+                            title: Text(routeItem),
                             leading: Icon(
                               Icons.directions_bus,
                               color: isSelected
