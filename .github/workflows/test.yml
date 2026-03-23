@@ -32,7 +32,7 @@ jobs:
 
       - name: ⚡ Restore Gradle Cache
         id: gradle-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -104,3 +104,21 @@ jobs:
           name: test-apks-${{ github.run_number }}
           path: build/app/outputs/flutter-apk/Next-Bus-Test-*.apk
           retention-days: 3
+  # --------------------------------------
+  # 📢 DISCORD NOTIFICATION
+  # --------------------------------------
+  notify:
+    needs: [test-android-release]
+    if: always() # Runs even if a previous job failed
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📢 Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ needs.test-android-release.result == 'success' || 'failure' }}
+          title: "🚀 Deployment for Test ${{ github.run_number }}"
+          description: |
+            **Android Build:** ${{ github.run_number }}
+            
+            Check the progress here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
