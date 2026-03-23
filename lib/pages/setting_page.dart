@@ -115,7 +115,7 @@ class SettingPage extends StatelessWidget {
         ? user!.displayName!.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase() // If yes
         : "GU"; // If no (GU => Guest User)
     final accessLevel = context.watch<UserDetails>().accessLevel;
-    final String message = "${user?.email ?? "Signed in as Guest"} \n($accessLevel)";
+    final String message = "${user?.email ?? "Signed in as Guest"}\n$accessLevel";
 
 
     return Scaffold(

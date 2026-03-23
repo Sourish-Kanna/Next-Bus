@@ -5,10 +5,12 @@ final List<Color> seedColorList = [
   Colors.deepPurple,
   Colors.deepOrange,
   Colors.indigo,
-  Colors.green
+  Colors.green,
+  Colors.teal,
+  Colors.pink,
 ];
 
-final double mobileBreakpoint = 840; // used as tablet and mobile ui are same and web view is diffrent
+final double mobileBreakpoint = 840; // used as tablet and mobile ui are same and web view is different
 final fallbackColor = seedColorList[1];
 
 final Map<String, String> urls = {

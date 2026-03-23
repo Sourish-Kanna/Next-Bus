@@ -35,7 +35,7 @@ class _AppLayoutState extends State<AppLayout> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      context.read<UserDetails>().fetchUserDetails();
+      context.read<UserDetails>().fetchUserDetails(isInit: _isInit);
       _isInit = false;
     }
   }

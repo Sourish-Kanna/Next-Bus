@@ -2,15 +2,16 @@ name: Build, Release, and Deploy
 
 on:
   release:
-    types: [published]
+    types: [released, prereleased]
 
 permissions:
   contents: read
 
-# --------------------------------------
-# 🔥 PRE-CACHE JOB (runs once)
-# --------------------------------------
 jobs:
+
+  # --------------------------------------
+  # 🔥 PRE-CACHE JOB (runs once)
+  # --------------------------------------
   precache:
     name: 🔥 Pre-cache Flutter & Gradle
     runs-on: ubuntu-latest
@@ -57,8 +58,6 @@ jobs:
         run: |
             flutter --version
             java -version
-#            ./android/gradlew --version
-        
 
   # --------------------------------------
   # 🔢 SETUP JOB
@@ -177,6 +176,8 @@ jobs:
   # --------------------------------------
   web-deploy:
     needs: [setup, precache]
+    # 🔥 This line ensures it only runs for full releases
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -210,3 +211,23 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_APP_NEXTBUS }}
           channelId: live
           projectId: app-nextbus
+
+  # --------------------------------------
+  # 📢 DISCORD NOTIFICATION
+  # --------------------------------------
+  notify:
+    needs: [setup, android-release, web-deploy]
+    if: always() # Runs even if a previous job failed
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📢 Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ (needs.android-release.result == 'success' && (needs.web-deploy.result == 'success' || needs.web-deploy.result == 'skipped')) && 'success' || 'failure' }}
+          title: "🚀 Deployment for ${{ needs.setup.outputs.build_name }}"
+          description: |
+            **Android Build:** ${{ needs.android-release.result }}
+            **Web Deploy:** ${{ needs.web-deploy.result == 'skipped' && '⏩ Skipped (Pre-release)' || needs.web-deploy.result }}
+            
+            Check the progress here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

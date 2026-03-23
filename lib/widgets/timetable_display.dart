@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'package:dynamic_color/dynamic_color.dart' show ColorHarmonization;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart' show Consumer, Provider;
 import 'package:nextbus/providers/providers.dart' show TimetableProvider, RouteProvider;
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -15,6 +17,8 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
   late AutoScrollController _autoController;
   final double _itemHeight = 110.0;
   bool _hasInitialScrolled = false;
+  Timer? _refreshTimer;
+  bool _showScrollToNowFab = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -23,6 +27,22 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
   void initState() {
     super.initState();
     _autoController = AutoScrollController();
+
+    // Refresh UI every minute to keep "isPast" and "NOW" divider accurate
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) setState(() {});
+    });
+
+    // Listen to scroll changes
+    _autoController.addListener(() {
+      final threshold = 200.0; // Show FAB if scrolled more than 200px from "Now"
+      // Simple logic: if offset is significant, show the button
+      if (_autoController.offset > threshold && !_showScrollToNowFab) {
+        setState(() => _showScrollToNowFab = true);
+      } else if (_autoController.offset <= threshold && _showScrollToNowFab) {
+        setState(() => _showScrollToNowFab = false);
+      }
+    });
 
     // Auto-scroll on initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -35,6 +55,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _autoController.dispose();
     super.dispose();
   }
@@ -43,20 +64,32 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
   void scrollToNow() {
     final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
     final timetable = timetableProvider.timetables[widget.route] ?? [];
-    int nowIndex = timetable.indexWhere((entry) => !_isPast(entry['time'])) - 1 ;
+    // Find where the divider would be
+    int nowDividerIndex = timetable.indexWhere((entry) => !_isPast(entry['time'])) -1;
 
-    if (nowIndex != -1) {
-      _autoController.scrollToIndex(nowIndex, preferPosition: AutoScrollPosition.begin);
+    if (nowDividerIndex != -1) {
+      // Scroll to the divider index specifically
+      _autoController.scrollToIndex(
+          nowDividerIndex,
+          preferPosition: AutoScrollPosition.begin,
+          duration: const Duration(milliseconds: 500),
+      );
     }
   }
 
   // THE REFRESH FUNCTION
   Future<void> refreshData() async {
     final routeProvider = Provider.of<RouteProvider>(context, listen: false);
+    final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
+    // 1. Fetch the new data
+    await timetableProvider.fetchTimetable(routeProvider.route);
 
-    // Force a re-fetch of the timetable for the current route
-    await Provider.of<TimetableProvider>(context, listen: false)
-        .fetchTimetable(routeProvider.route);
+    // 2. Trigger a rebuild to update "isPast" calculations and the "NOW" divider
+    if (mounted) {
+      setState(() {
+        // This empty setState forces build() to run again with the new DateTime.now()
+      });
+    }
   }
 
   bool _isPast(String timeStr) {
@@ -70,12 +103,31 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
     }
   }
 
-  (String, Color) _getDelayInfo(num seconds, bool departed, ColorScheme colors) {
-    if (departed) return ("Departed", colors.outline);
-    double minutes = seconds / 60.0;
-    if (seconds <= 0) return ("On Time", Colors.green.shade700);
-    if (seconds < 180) return ("${minutes.toStringAsFixed(1)}m late", Colors.orange.shade700);
-    return ("${minutes.toStringAsFixed(1)}m late", Colors.red.shade700);
+  (String, Color) getDelayInfo(num seconds, bool departed, ColorScheme colors) {
+    // Use M3 Harmonization dynamically based on the current theme's primary
+    final Color earlyColor = Colors.green.harmonizeWith(colors.primary);
+    final Color lateColor = Colors.orange.harmonizeWith(colors.primary);
+    final Color vLateColor = colors.error; // Use the built-in M3 Error slot
+
+    double minutes = (seconds / 60.0).abs();
+    String durationStr = minutes.toStringAsFixed(minutes < 1 ? 0 : 1);
+
+    // Departed logic: use high-contrast text color with transparency
+    if (departed) {
+      return (_getLabel(seconds, durationStr), colors.outline);
+    }
+
+    // Active logic
+    if (seconds < -60) return ("${durationStr}m early", earlyColor);
+    if (seconds <= 60) return ("On Time", earlyColor);
+    if (seconds < 180) return ("${durationStr}m late", lateColor);
+    return ("${durationStr}m late", vLateColor);
+  }
+
+  String _getLabel(num seconds, String duration) {
+    if (seconds < -60) return "${duration}m early";
+    if (seconds <= 60) return "On Time";
+    return "${duration}m late";
   }
 
   void resetScrollFlag() {
@@ -100,10 +152,10 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
         return Stack(
           children: [
             RefreshIndicator(
-              onRefresh: () {
-                refreshData();
+              onRefresh: () async {
+                await refreshData();
                 scrollToNow();
-                return Future.delayed(const Duration(seconds: 1));
+                await Future.delayed(const Duration(seconds: 1));
               },
               child: ListView.builder(
                 controller: _autoController,
@@ -134,7 +186,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
     final actualIndex = (nowDividerIndex != -1 && index > nowDividerIndex) ? index - 1 : index;
     final entry = timetable[actualIndex];
     final bool departed = _isPast(entry['time']);
-    final (delayText, delayColor) = _getDelayInfo(entry['delay'] as num, departed, colors);
+    final (delayText, delayColor) = getDelayInfo(entry['delay'] as num, departed, colors);
     final bool isLast = actualIndex == timetable.length - 1;
 
     return SizedBox(
@@ -176,7 +228,7 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: departed ? colors.surfaceContainerHighest.withValues(alpha: 0.3,) : colors.primaryContainer.withValues(alpha:0.7),
+          color: departed ? colors.primaryContainer.withValues(alpha: 0.4,) : colors.primaryContainer.withValues(alpha:0.7),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -187,12 +239,13 @@ class TimetableDisplayState extends State<TimetableDisplay> with AutomaticKeepAl
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(entry['time'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: departed ? colors.outline : colors.onPrimaryContainer)),
-                  // const SizedBox(height: 2),
+                  const SizedBox(height: 2),
+                  Text('No. of entries: ${entry['count']}', style: TextStyle(fontSize: 13, color: departed ? colors.outline : colors.onSurfaceVariant)),
                   // Tooltip(
-                  //   message: entry['stop'],
+                  //   message: "${entry['time']} ($delayText)",
                   //   triggerMode: TooltipTriggerMode.longPress,
                   //   child: Text(
-                  //     entry['stop'],
+                  //     delayText,
                   //     maxLines: 1,
                   //     overflow: TextOverflow.ellipsis,
                   //     style: TextStyle(color: departed ? colors.outline : colors.onSurfaceVariant, fontSize: 13),
