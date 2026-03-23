@@ -2,7 +2,7 @@ name: Build, Release, and Deploy
 
 on:
   release:
-    types: [released, prereleased]
+    types: [published, released, prereleased]
 
 permissions:
   contents: read
