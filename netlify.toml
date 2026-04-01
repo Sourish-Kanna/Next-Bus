@@ -7,6 +7,7 @@
 # --- Base settings ---
 [build]
   # Tell Netlify where Flutter's web output is.
+  # Ensure API_LINK is there in Enviroment Variables
   publish = "build/web"
   command = "bash build.sh"
 
