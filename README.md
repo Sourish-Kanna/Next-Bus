@@ -72,7 +72,7 @@ Designed for real Indian commute conditions.
 
 ---
 
-## 🧑‍💼 Why This Project Matters (For Recruiters)
+## 🧑‍💼 Why This Project Matters
 
 This is not a demo app.
 
