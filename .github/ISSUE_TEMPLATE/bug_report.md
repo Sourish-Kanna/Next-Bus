@@ -1,47 +1,23 @@
 ---
 name: Bug report
-about: Create a report to help track and fix a bug.
-title: "BUG: [Short description of bug]"
+about: Report a bug to help us improve.
+title: "BUG: [Short description]"
 labels: bug
-# assignees: Sourish-Kanna
-
 ---
 
-### 1. Describe the Bug
-A clear and concise description of what the bug is.
+### Summary
 
----
+What’s happening? (Include error messages here if any).
 
-### 2. Steps to Reproduce
-Steps to reproduce the behavior:
-    1. Go to '...'
-    2. Click on '....'
-    3. Scroll down to '....'
-    4. See error
+### Reproduction Steps
 
----
+1.
+2.
+3.
 
-### 3. Expected Behavior
-A clear and concise description of what you expected to happen.
+### Expected vs Actual
 
----
-
-### 4. Actual Behavior
-What actually happened. (If possible, include the error message.)
-
----
-
-### 5. Screenshots (Optional)
-If applicable, add screenshots to help explain your problem.
-
----
-
-### 6. Environment
-    - **Platform:** [e.g., Android, Windows, Web]  
-    - **Device:** [e.g., Pixel 7, Desktop]  
-    - **App Version:** [e.g., v1.2.1]
-
----
-
-### 7. Additional Context (Optional)
-Add any other context about the problem here.
+- **Expected:** - **Actual:** ### Context
+- **Env:** [e.g., Web/Chrome, Android, iOS]
+- **Version:** [e.g., v1.2.1]
+- **Media:** [Drop screenshots/videos here]
