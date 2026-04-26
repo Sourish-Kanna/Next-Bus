@@ -5,14 +5,14 @@ title: "FEAT: [Short description]"
 labels: enhancement
 ---
 
-### The Problem
+## The Problem
 
 What is missing or frustrating in the current flow?
 
-### Proposed Solution
+## Proposed Solution
 
 Describe the feature or change you'd like to see.
 
-### Impact / Use Case
+## Impact / Use Case
 
 How would this help you or other users? (Include screenshots or mockups if possible).

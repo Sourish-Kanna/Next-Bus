@@ -5,17 +5,17 @@ title: "BUG: [Short description]"
 labels: bug
 ---
 
-### Summary
+## Summary
 
 What’s happening? (Include error messages here if any).
 
-### Reproduction Steps
+## Reproduction Steps
 
 1.
 2.
 3.
 
-### Expected vs Actual
+## Expected vs Actual
 
 - **Expected:** - **Actual:** ### Context
 - **Env:** [e.g., Web/Chrome, Android, iOS]
