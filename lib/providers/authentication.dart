@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
+import 'package:flutter/material.dart' show BuildContext, ChangeNotifier;
+import 'package:flutter/foundation.dart' show ChangeNotifier, kIsWeb;
+import 'package:nextbus/constant.dart' show urls;
+import 'package:provider/provider.dart' show Provider;
 
-import 'package:nextbus/common.dart';
-import 'package:nextbus/providers/user_details.dart';
+import 'package:nextbus/common.dart' show AppLogger, CustomSnackBar;
+import 'package:nextbus/providers/user_details.dart' show UserDetails;
+import 'package:nextbus/providers/api_caller.dart' show ApiService;
 
 class AuthService with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -59,6 +61,8 @@ class AuthService with ChangeNotifier {
       final user = userCredential.user;
 
       if (user != null) {
+        await syncUserWithBackend();
+
         AppLogger.info(
           "Google Sign-In success → UID: ${user.uid}, Email: ${user.email}",
         );
@@ -147,5 +151,28 @@ class AuthService with ChangeNotifier {
     } catch (e) {
       AppLogger.error("Sign-Out Error", e);
     }
+  }
+}
+
+Future<void> syncUserWithBackend() async {
+  try {
+    AppLogger.info("Attempting to sync user with backend...");
+
+    final apiService = ApiService();
+
+    // No data body is needed because the backend extracts everything from the JWT token.
+    final response = await apiService.post(urls['SyncUser']!);
+
+    if (response.statusCode == 200) {
+      AppLogger.info("User successfully synced with backend: ${response.data}");
+    } else {
+      AppLogger.info(
+        "Backend sync returned unexpected status: ${response.statusCode}",
+      );
+    }
+  } catch (e) {
+    // We log the error but do not throw it.
+    // If the backend has a brief hiccup, we still want the user to enter the app!
+    AppLogger.error("Failed to sync user with backend", e);
   }
 }

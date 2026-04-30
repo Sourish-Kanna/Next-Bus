@@ -16,8 +16,7 @@ class TimetableProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchTimetable(String route) async {
-    if (route.isEmpty)
-      return; // Removed 'containsKey' check to allow refreshing
+    if (route.isEmpty) return; // Removed 'containsKey' check to allow refreshing
 
     // 1. Only set loading to true if we don't have data in memory yet.
     // This prevents the UI from flashing a spinner if we are just refreshing existing data.

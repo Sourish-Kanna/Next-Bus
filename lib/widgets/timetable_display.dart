@@ -158,12 +158,10 @@ class TimetableDisplayState extends State<TimetableDisplay>
 
     return Consumer<TimetableProvider>(
       builder: (context, timetableProvider, child) {
-        if (timetableProvider.isLoading)
-          return const Center(child: CircularProgressIndicator());
+        if (timetableProvider.isLoading) return const Center(child: CircularProgressIndicator());
 
         final timetable = timetableProvider.timetables[widget.route] ?? [];
-        if (timetable.isEmpty)
-          return const Center(child: Text('No timetable data available.'));
+        if (timetable.isEmpty) return const Center(child: Text('No timetable data available.'));
 
         int nowDividerIndex = timetable.indexWhere(
           (entry) => !_isPast(entry['time']),

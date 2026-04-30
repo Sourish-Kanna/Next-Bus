@@ -10,15 +10,17 @@ final List<Color> seedColorList = [
   Colors.pink,
 ];
 
-final double mobileBreakpoint = 840; // used as tablet and mobile ui are same and web view is different
+final double mobileBreakpoint =
+    840; // used as tablet and mobile ui are same and web view is different
 final fallbackColor = seedColorList[1];
 
 final Map<String, String> urls = {
-  'addRoute': '/v1/route/add',
-  'updateTime': '/v1/timings/update',
-  'busRoutes': '/v1/route/routes',
-  'busTimes': '/v1/timings/{route}',
-  "user": '/v1/user/get-user-details',
+  'addRoute': 'v1/route/add',
+  'updateTime': 'v1/timings/update',
+  'busRoutes': 'v1/route/routes',
+  'busTimes': 'v1/timings/{route}',
+  "user": 'v1/user/get-user-details',
+  "SyncUser": 'v1/user/sync',
 };
 
 enum NavigationDestinations { login, home, route, settings, admin }
