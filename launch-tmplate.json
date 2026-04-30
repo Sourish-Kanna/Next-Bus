@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0", // move to .vscode folder
+    "configurations": [
+        {
+            "name": "Next-Bus-Frontend (Local-Android)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_LINK=http://10.0.2.2:8000"
+            ]
+        },
+        {
+            "name": "Next-Bus-Frontend (Local-Web)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_LINK=http://127.0.0.1:8000"
+            ]
+        },
+        {
+            "name": "Next-Bus-Frontend (Online-Prod)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_LINK=<ADD_API_LINK_HERE>",
+                "--dart-define=ENVIRONMENT=prod"
+            ]
+        },
+        {
+            "name": "Next-Bus-Frontend (Online-Dev)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_LINK=<ADD_API_LINK_HERE>",
+                "--dart-define=ENVIRONMENT=dev"
+            ]
+        }
+    ]
+}
