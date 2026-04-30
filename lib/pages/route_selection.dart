@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nextbus/providers/providers.dart' show RouteProvider, NavigationProvider;
+import 'package:nextbus/providers/providers.dart'
+    show RouteProvider, NavigationProvider;
 import 'package:nextbus/common.dart' show AppLogger;
 import 'package:nextbus/constant.dart' show NavigationDestinations;
 import 'package:provider/provider.dart' show ReadContext, WatchContext;
@@ -69,10 +70,10 @@ class _RouteSelectState extends State<RouteSelect> {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-            'Select a TMT Bus Route',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+        title: const Text(
+          'Select a TMT Bus Route',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: _isLoading

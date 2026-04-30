@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:dynamic_color/dynamic_color.dart' show ColorSchemeHarmonization, DynamicColorBuilder;
+import 'package:dynamic_color/dynamic_color.dart'
+    show ColorSchemeHarmonization, DynamicColorBuilder;
 import 'package:nextbus/common.dart' show AppLogger;
 import 'package:provider/provider.dart' show Consumer, Provider;
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, User;
-import 'package:firebase_analytics/firebase_analytics.dart' show FirebaseAnalyticsObserver;
+import 'package:firebase_analytics/firebase_analytics.dart'
+    show FirebaseAnalyticsObserver;
 
-import 'package:nextbus/providers/providers.dart' show ThemeProvider, ConnectivityProvider, TimetableProvider;
+import 'package:nextbus/providers/providers.dart'
+    show ThemeProvider, ConnectivityProvider, TimetableProvider;
 import 'package:nextbus/pages/pages.dart' show AuthScreen;
 import 'package:nextbus/layout.dart' show AppLayout;
 import 'package:nextbus/constant.dart' show fallbackColor;
@@ -25,18 +28,23 @@ class NextBusApp extends StatefulWidget {
 }
 
 class _NextBusAppState extends State<NextBusApp> {
-
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final connProvider = Provider.of<ConnectivityProvider>(context, listen: false);
+      final connProvider = Provider.of<ConnectivityProvider>(
+        context,
+        listen: false,
+      );
 
       connProvider.addListener(() {
         if (connProvider.isOnline) {
           AppLogger.info("Back Online! Triggering sync...");
-          Provider.of<TimetableProvider>(context, listen: false).syncPendingReports();
+          Provider.of<TimetableProvider>(
+            context,
+            listen: false,
+          ).syncPendingReports();
         }
       });
     });
@@ -72,9 +80,7 @@ class _NextBusAppState extends State<NextBusApp> {
               theme: ThemeData(colorScheme: lightColorScheme),
               darkTheme: ThemeData(colorScheme: darkColorScheme),
               themeMode: themeProvider.themeMode,
-              navigatorObservers: [
-                widget.observer,
-              ],
+              navigatorObservers: [widget.observer],
               home: StreamBuilder<User?>(
                 stream: FirebaseAuth.instance.authStateChanges(),
                 initialData: widget.initialUser,

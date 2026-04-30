@@ -8,7 +8,6 @@ import 'package:nextbus/common.dart';
 import 'package:nextbus/providers/user_details.dart';
 
 class AuthService with ChangeNotifier {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
@@ -21,7 +20,9 @@ class AuthService with ChangeNotifier {
   /// 🔹 Listen to Firebase auth state changes
   void _initializeAuth() {
     _auth.authStateChanges().listen((User? user) {
-      AppLogger.info("Auth state changed → ${user?.uid}, anonymous: ${user?.isAnonymous}");
+      AppLogger.info(
+        "Auth state changed → ${user?.uid}, anonymous: ${user?.isAnonymous}",
+      );
       notifyListeners();
     });
   }
@@ -58,23 +59,27 @@ class AuthService with ChangeNotifier {
       final user = userCredential.user;
 
       if (user != null) {
-        AppLogger.info("Google Sign-In success → UID: ${user.uid}, Email: ${user.email}");
+        AppLogger.info(
+          "Google Sign-In success → UID: ${user.uid}, Email: ${user.email}",
+        );
 
-      if (context.mounted) {
-        final userDetails = Provider.of<UserDetails>(context, listen: false);
-        await userDetails.fetchUserDetails();
-        AppLogger.info("UserDetails → Admin: ${userDetails.isAdmin}, Guest: ${userDetails.isGuest}, Logged: ${userDetails.isLoggedIn}");
-      }
-      
-      return user;
+        if (context.mounted) {
+          final userDetails = Provider.of<UserDetails>(context, listen: false);
+          await userDetails.fetchUserDetails();
+          AppLogger.info(
+            "UserDetails → Admin: ${userDetails.isAdmin}, Guest: ${userDetails.isGuest}, Logged: ${userDetails.isLoggedIn}",
+          );
+        }
+
+        return user;
       }
 
       return null;
     } catch (e) {
       if (context.mounted) {
         CustomSnackBar.showError(
-            context,
-            "Sign-in failed. Please check your internet or configuration."
+          context,
+          "Sign-in failed. Please check your internet or configuration.",
         );
       }
       AppLogger.error("Google Sign-In Error", e);
@@ -95,7 +100,9 @@ class AuthService with ChangeNotifier {
         if (context.mounted) {
           final userDetails = Provider.of<UserDetails>(context, listen: false);
           await userDetails.fetchUserDetails();
-          AppLogger.info("UserDetails → Admin: ${userDetails.isAdmin}, Guest: ${userDetails.isGuest}, Logged: ${userDetails.isLoggedIn}");
+          AppLogger.info(
+            "UserDetails → Admin: ${userDetails.isAdmin}, Guest: ${userDetails.isGuest}, Logged: ${userDetails.isLoggedIn}",
+          );
         }
       }
 
@@ -103,8 +110,8 @@ class AuthService with ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         CustomSnackBar.showError(
-            context,
-            "Sign-in failed. Please check your internet or configuration."
+          context,
+          "Sign-in failed. Please check your internet or configuration.",
         );
       }
       AppLogger.error("Guest Login Error", e);
@@ -118,7 +125,9 @@ class AuthService with ChangeNotifier {
       final currentUser = _auth.currentUser;
 
       if (currentUser != null) {
-        AppLogger.info("Signing out user → UID: ${currentUser.uid}, anonymous: ${currentUser.isAnonymous}");
+        AppLogger.info(
+          "Signing out user → UID: ${currentUser.uid}, anonymous: ${currentUser.isAnonymous}",
+        );
 
         if (currentUser.isAnonymous) {
           await currentUser.delete();

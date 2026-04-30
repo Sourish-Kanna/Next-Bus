@@ -16,7 +16,8 @@ class TimetableProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchTimetable(String route) async {
-    if (route.isEmpty) return; // Removed 'containsKey' check to allow refreshing
+    if (route.isEmpty)
+      return; // Removed 'containsKey' check to allow refreshing
 
     // 1. Only set loading to true if we don't have data in memory yet.
     // This prevents the UI from flashing a spinner if we are just refreshing existing data.
@@ -42,12 +43,14 @@ class TimetableProvider with ChangeNotifier {
       } catch (e) {
         AppLogger.warn("Failed to parse cached timetable for $route");
       }
-      return ;
+      return;
     }
 
     // 3. NETWORK LAYER: Fetch fresh data in the background
     try {
-      final response = await _apiService.get(urls['busTimes']!.replaceAll('{route}', route));
+      final response = await _apiService.get(
+        urls['busTimes']!.replaceAll('{route}', route),
+      );
 
       if (response.statusCode == 200) {
         List<dynamic> newData = response.data['data'];
@@ -61,18 +64,20 @@ class TimetableProvider with ChangeNotifier {
         AppLogger.info("Fetched fresh timetable for route $route from API.");
       }
     } catch (e, stack) {
-      AppLogger.error(
-        "Failed to fetch timetable for route: $route",
-        e,
-        stack,
-      );
+      AppLogger.error("Failed to fetch timetable for route: $route", e, stack);
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<Map<String, dynamic>> addRoute(String routeName, List<String> stops, String timing, String start, String end) async {
+  Future<Map<String, dynamic>> addRoute(
+    String routeName,
+    List<String> stops,
+    String timing,
+    String start,
+    String end,
+  ) async {
     Map<String, dynamic> data = {
       "route_name": routeName,
       "stops": stops,
@@ -84,10 +89,15 @@ class TimetableProvider with ChangeNotifier {
     try {
       var response = await _apiService.post(urls['addRoute']!, data: data);
 
-      if (response.statusCode == 200 && response.data != null && response.data is Map<String, dynamic>) {
+      if (response.statusCode == 200 &&
+          response.data != null &&
+          response.data is Map<String, dynamic>) {
         return {'success': true, 'data': response.data['data']};
       } else {
-        return {'success': false, 'message': response.data['detail'] ?? 'Failed to add route'};
+        return {
+          'success': false,
+          'message': response.data['detail'] ?? 'Failed to add route',
+        };
       }
     } catch (e) {
       AppLogger.info("Error adding route: $e");
@@ -96,11 +106,15 @@ class TimetableProvider with ChangeNotifier {
   }
 
   // [Modified] updateTime with Offline Fallback
-  Future<Map<String, dynamic>> updateTime(String routeName, String stopName, String timing) async {
+  Future<Map<String, dynamic>> updateTime(
+    String routeName,
+    String stopName,
+    String timing,
+  ) async {
     Map<String, dynamic> data = {
       "route_name": routeName,
       "timing": timing,
-      "stop": stopName
+      "stop": stopName,
     };
 
     try {
@@ -116,30 +130,28 @@ class TimetableProvider with ChangeNotifier {
       if (response.statusCode == 429) {
         return {
           'success': false,
-          'message': 'Rate limit exceeded (429). Please wait.'
+          'message': 'Rate limit exceeded (429). Please wait.',
         };
       }
 
       return {
         'success': false,
-        'message': response.data['detail'] ?? 'Failed to update time'
+        'message': response.data['detail'] ?? 'Failed to update time',
       };
-
     } catch (e) {
       // If the error is a Dio/Network error, handle offline mode
       // If it's a 429 inside the catch block (depending on your ApiService setup):
       if (e.toString().contains('429')) {
-        return {'success': false, 'message': 'Too many reports. Please wait (429).'};
+        return {
+          'success': false,
+          'message': 'Too many reports. Please wait (429).',
+        };
       }
 
       AppLogger.warn("Network failed. Saving report offline.");
       await _queueOfflineReport(data);
 
-      return {
-        'success': true,
-        'message': 'Saved offline.',
-        'isOffline': true
-      };
+      return {'success': true, 'message': 'Saved offline.', 'isOffline': true};
     }
   }
 
@@ -195,7 +207,10 @@ class TimetableProvider with ChangeNotifier {
           _handleSuccessfulUpdate(data['route_name']);
         } else {
           // If API rejects it (e.g. 400 Bad Request), don't retry. Log it and move on.
-          AppLogger.error("Server rejected offline report: ${response.data}", response);
+          AppLogger.error(
+            "Server rejected offline report: ${response.data}",
+            response,
+          );
         }
       } catch (e) {
         // If network fails AGAIN, keep it in the list to try next time

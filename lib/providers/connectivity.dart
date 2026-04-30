@@ -19,7 +19,9 @@ class ConnectivityProvider extends ChangeNotifier {
       _isOnline = (status == InternetStatus.connected);
 
       if (wasOnline != _isOnline) {
-        AppLogger.onlyLocal('Connectivity status changed: ${_isOnline ? "ONLINE" : "OFFLINE"}',);
+        AppLogger.onlyLocal(
+          'Connectivity status changed: ${_isOnline ? "ONLINE" : "OFFLINE"}',
+        );
         notifyListeners();
       }
     });

@@ -64,8 +64,8 @@ class ErrorScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                )
-              ]
+                ),
+              ],
             ],
           ),
         ),

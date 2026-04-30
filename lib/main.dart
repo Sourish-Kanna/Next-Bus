@@ -1,19 +1,25 @@
-import 'package:connectivity_plus/connectivity_plus.dart' show Connectivity, ConnectivityResult;
-import 'package:firebase_analytics/firebase_analytics.dart' show FirebaseAnalytics, FirebaseAnalyticsObserver;
+import 'package:connectivity_plus/connectivity_plus.dart'
+    show Connectivity, ConnectivityResult;
+import 'package:firebase_analytics/firebase_analytics.dart'
+    show FirebaseAnalytics, FirebaseAnalyticsObserver;
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, User;
 import 'package:firebase_core/firebase_core.dart' show Firebase;
-import 'package:firebase_crashlytics/firebase_crashlytics.dart' show FirebaseCrashlytics;
-import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher, TargetPlatform, defaultTargetPlatform;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart'
+    show FirebaseCrashlytics;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, PlatformDispatcher, TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart' show InternetCheckOption, InternetConnection;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart'
+    show InternetCheckOption, InternetConnection;
 
 import 'package:nextbus/pages/error_screen.dart' show ErrorScreen;
 import 'package:nextbus/providers/providers.dart';
 import 'package:nextbus/common.dart' show AppLogger;
 import 'package:nextbus/config.dart' show Config;
 import 'package:nextbus/entry.dart' show NextBusApp;
-import 'package:provider/provider.dart' show ChangeNotifierProvider, MultiProvider;
+import 'package:provider/provider.dart'
+    show ChangeNotifierProvider, MultiProvider;
 
 void main() async {
   // Ensure bindings are initialized before doing anything else
@@ -56,9 +62,7 @@ class _AppInitializerState extends State<AppInitializer> {
       final connection = InternetConnection.createInstance(
         checkInterval: const Duration(seconds: 120), // Give it 120s to wake up
         customCheckOptions: [
-          InternetCheckOption(
-            uri: Uri.parse(Config.apiUrl),
-          ),
+          InternetCheckOption(uri: Uri.parse(Config.apiUrl)),
         ],
       );
 
@@ -71,7 +75,6 @@ class _AppInitializerState extends State<AppInitializer> {
 
   // Runs all initialization logic and updates the state.
   Future<void> _initializeApp() async {
-    
     // Set state to loading when retrying
     if (mounted) {
       setState(() {
@@ -93,11 +96,15 @@ class _AppInitializerState extends State<AppInitializer> {
     bool isOffline = connectivityResult.contains(ConnectivityResult.none);
 
     if (isOffline) {
-      AppLogger.onlyLocal("No Internet Connection (Instant Check) - Starting in Offline Mode");
+      AppLogger.onlyLocal(
+        "No Internet Connection (Instant Check) - Starting in Offline Mode",
+      );
     } else {
       final bool hasInternet = await InternetConnection().hasInternetAccess;
       if (!hasInternet) {
-        AppLogger.onlyLocal("Connected to Router but No Internet Access - Starting in Offline Mode");
+        AppLogger.onlyLocal(
+          "Connected to Router but No Internet Access - Starting in Offline Mode",
+        );
         isOffline = true;
       }
     }
@@ -121,7 +128,9 @@ class _AppInitializerState extends State<AppInitializer> {
         await Firebase.initializeApp(options: Config.firebaseOptions);
         AppLogger.onlyLocal("Firebase initialized successfully.");
       } else {
-        AppLogger.onlyLocal("Firebase was already initialized. Using existing instance.");
+        AppLogger.onlyLocal(
+          "Firebase was already initialized. Using existing instance.",
+        );
       }
 
       _analytics = FirebaseAnalytics.instance;
@@ -184,9 +193,7 @@ class _AppInitializerState extends State<AppInitializer> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(
-                    strokeCap: StrokeCap.round,
-                  ),
+                  CircularProgressIndicator(strokeCap: StrokeCap.round),
                   SizedBox(height: 16),
                   Text("Loading..."),
                 ],
@@ -209,7 +216,7 @@ class _AppInitializerState extends State<AppInitializer> {
         );
 
       case AppStatus.success:
-      // Show the main app
+        // Show the main app
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (context) => AuthService()),

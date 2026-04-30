@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:nextbus/widgets/widgets.dart' show SettingsGroupCard, ThemeSettings;
-import 'package:nextbus/providers/providers.dart' show AuthService, UserDetails, ConnectivityProvider, NavigationProvider;
+import 'package:nextbus/widgets/widgets.dart'
+    show SettingsGroupCard, ThemeSettings;
+import 'package:nextbus/providers/providers.dart'
+    show AuthService, UserDetails, ConnectivityProvider, NavigationProvider;
 import 'package:provider/provider.dart' show ReadContext, WatchContext;
 import 'package:nextbus/pages/pages.dart' show AuthScreen;
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
-import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImageProvider;
+import 'package:cached_network_image/cached_network_image.dart'
+    show CachedNetworkImageProvider;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../common.dart';
@@ -17,21 +20,27 @@ class SettingPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          icon: Icon(Icons.auto_awesome_rounded, color: Theme.of(context).colorScheme.primary),
+          icon: Icon(
+            Icons.auto_awesome_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           title: const Text("The Story"),
           content: const SingleChildScrollView(
             child: Text(
               "This data is the result of 3.5 years of manually tracking my daily commute "
-                  "from Thane Station to Tikujiniwadi.\n\n"
-                  "It includes data for Route 56 and the parallel Route 156, "
-                  "which shares 95% of the same path.\n\n"
-                  "It started as a personal project to never miss a bus again. I hope it helps you too.",
+              "from Thane Station to Tikujiniwadi.\n\n"
+              "It includes data for Route 56 and the parallel Route 156, "
+              "which shares 95% of the same path.\n\n"
+              "It started as a personal project to never miss a bus again. I hope it helps you too.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 15, height: 1.4),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"),
+            ),
           ],
         );
       },
@@ -43,18 +52,24 @@ class SettingPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          icon: Icon(Icons.gpp_maybe_rounded, color: Theme.of(context).colorScheme.primary),
+          icon: Icon(
+            Icons.gpp_maybe_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           title: const Text("Data Authenticity"),
           content: const SingleChildScrollView(
             child: Text(
               "This application uses crowdsourced data collected from user reports. "
-                  "While we strive for accuracy, bus timings and availability may vary. "
-                  "Please use this data as a guide.",
+              "While we strive for accuracy, bus timings and availability may vary. "
+              "Please use this data as a guide.",
               textAlign: TextAlign.center,
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"),
+            ),
           ],
         );
       },
@@ -79,7 +94,7 @@ class SettingPage extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.errorContainer,
               foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-          ),
+            ),
             child: const Text("Logout"),
           ),
         ],
@@ -102,27 +117,38 @@ class SettingPage extends StatelessWidget {
     // 3. Navigate to AuthScreen and REMOVE ALL BACK HISTORY
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const AuthScreen()),
-          (Route<dynamic> route) => false, // This predicate false = remove everything
+      (Route<dynamic> route) =>
+          false, // This predicate false = remove everything
     );
   }
 
   @override
   Widget build(BuildContext context) {
-
     final user = context.watch<AuthService>().user;
     final isOnline = context.watch<ConnectivityProvider>().isOnline;
-    final String initials = user?.displayName?.trim().isNotEmpty ?? false // checks if display name is there or not
-        ? user!.displayName!.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase() // If yes
+    final String initials =
+        user?.displayName?.trim().isNotEmpty ??
+            false // checks if display name is there or not
+        ? user!.displayName!
+              .trim()
+              .split(' ')
+              .map((e) => e[0])
+              .take(2)
+              .join()
+              .toUpperCase() // If yes
         : "GU"; // If no (GU => Guest User)
     final accessLevel = context.watch<UserDetails>().accessLevel;
-    final String message = "${user?.email ?? "Signed in as Guest"}\n$accessLevel";
-
+    final String message =
+        "${user?.email ?? "Signed in as Guest"}\n$accessLevel";
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Settings",style: TextStyle(fontWeight: FontWeight.bold),),
+        title: const Text(
+          "Settings",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -145,23 +171,27 @@ class SettingPage extends StatelessWidget {
                 // Tooltip(
                 //   message: message,
                 //   triggerMode: TooltipTriggerMode.longPress,
-                //   child: 
+                //   child:
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                   leading: CircleAvatar(
                     radius: 24,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                     backgroundImage: user.photoURL != null
                         ? CachedNetworkImageProvider(user.photoURL!)
                         : null,
                     child: user.photoURL == null
                         ? Text(
-                      initials,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
+                            initials,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
                         : null,
                   ),
                   title: Text(
@@ -170,10 +200,10 @@ class SettingPage extends StatelessWidget {
                   ),
                   isThreeLine: true,
                   subtitle: Text(
-                      message,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    message,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   // ),
                 ),
                 // const Divider(height: 24), // Separator
@@ -185,7 +215,10 @@ class SettingPage extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: isOnline
                       ? () => _confirmLogout(context)
-                      : () => CustomSnackBar.showError(context, "You cannot logout while offline."),
+                      : () => CustomSnackBar.showError(
+                          context,
+                          "You cannot logout while offline.",
+                        ),
                   style: ElevatedButton.styleFrom(
                     // Grey out the button visually if offline
                     backgroundColor: isOnline
@@ -196,8 +229,12 @@ class SettingPage extends StatelessWidget {
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  icon: isOnline ? const Icon(Icons.logout) : const Icon(Icons.wifi_off),
-                  label: Text(isOnline ? "Logout" : "Offline (Logout Disabled)"),
+                  icon: isOnline
+                      ? const Icon(Icons.logout)
+                      : const Icon(Icons.wifi_off),
+                  label: Text(
+                    isOnline ? "Logout" : "Offline (Logout Disabled)",
+                  ),
                 ),
               ),
             ],

@@ -70,8 +70,10 @@ class ProdFirebaseOptions {
     messagingSenderId: '439297986668',
     projectId: 'app-nextbus',
     storageBucket: 'app-nextbus.firebasestorage.app',
-    androidClientId: '439297986668-lr0ol4ijg55d18utuckg274k78e4egol.apps.googleusercontent.com',
-    iosClientId: '439297986668-v0isoa48flfc16drsaibhcsqb9nn0vug.apps.googleusercontent.com',
+    androidClientId:
+        '439297986668-lr0ol4ijg55d18utuckg274k78e4egol.apps.googleusercontent.com',
+    iosClientId:
+        '439297986668-v0isoa48flfc16drsaibhcsqb9nn0vug.apps.googleusercontent.com',
     iosBundleId: 'com.sourish.nextbus',
   );
 }

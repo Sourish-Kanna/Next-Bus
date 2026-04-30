@@ -71,14 +71,15 @@ class AuthScreen extends StatelessWidget {
                   if (user != null && context.mounted) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const AppLayout(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const AppLayout()),
                     );
                   }
                 },
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
@@ -97,14 +98,15 @@ class AuthScreen extends StatelessWidget {
                   if (user != null && context.mounted) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const AppLayout(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const AppLayout()),
                     );
                   }
                 },
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),

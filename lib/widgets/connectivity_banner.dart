@@ -17,73 +17,83 @@ class ConnectivityBanner extends StatelessWidget {
           child: connectivity.isOnline
               ? const SizedBox.shrink() // Height becomes 0 nicely
               : Material(
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: InkWell(
-              onTap: () async {
-                // Visual Feedback (Clearer)
-                CustomSnackBar.show(
-                  context,
-                  'Checking connection...',
-                  // backgroundColor: Colors.green,
-                  // foregroundColor: Colors.white,
-                );
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: InkWell(
+                    onTap: () async {
+                      // Visual Feedback (Clearer)
+                      CustomSnackBar.show(
+                        context,
+                        'Checking connection...',
+                        // backgroundColor: Colors.green,
+                        // foregroundColor: Colors.white,
+                      );
 
-                // Perform Check
-                bool isNowOnline = await connectivity.checkConnection();
+                      // Perform Check
+                      bool isNowOnline = await connectivity.checkConnection();
 
-                // Feedback
-                if (context.mounted) {
-                  if (isNowOnline) {
-                    CustomSnackBar.showSuccess(
-                      context,
-                      'Back online!',
-                      // backgroundColor: Colors.green,
-                      // foregroundColor: Colors.white,
-                    );
-                  } else {
-                    CustomSnackBar.showInfo(
-                      context,
-                      'Still offline. Please check settings.',
-                      // backgroundColor: Theme.of(context).colorScheme.error,
-                      // foregroundColor: Theme.of(context).colorScheme.onError,
-                    );
-                  }
-                }
-              },
-              child: Container(
-                width: double.infinity,
-                // Increased padding for better touch target
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.wifi_off_rounded,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Text(
-                        'No connection. Tap to retry.',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
+                      // Feedback
+                      if (context.mounted) {
+                        if (isNowOnline) {
+                          CustomSnackBar.showSuccess(
+                            context,
+                            'Back online!',
+                            // backgroundColor: Colors.green,
+                            // foregroundColor: Colors.white,
+                          );
+                        } else {
+                          CustomSnackBar.showInfo(
+                            context,
+                            'Still offline. Please check settings.',
+                            // backgroundColor: Theme.of(context).colorScheme.error,
+                            // foregroundColor: Theme.of(context).colorScheme.onError,
+                          );
+                        }
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      // Increased padding for better touch target
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            size: 20,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              'No connection. Tap to retry.',
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onErrorContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.refresh_rounded,
+                            size: 20,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.refresh_rounded,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
         );
       },
     );
