@@ -2,7 +2,7 @@ name: Build, Release, and Deploy
 
 on:
   release:
-    types: [published, released, prereleased]
+    types: [released, prereleased]
 
 permissions:
   contents: read
@@ -146,7 +146,7 @@ jobs:
           
           # 64-bit APK
           OLD_NAME_64="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
-          NEW_NAME_64="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-arm64.apk"
+          NEW_NAME_64="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-(64-Bit).apk"
           
           if [ -f "$OLD_NAME_64" ]; then
             echo "Renaming 64-bit APK..."
@@ -157,7 +157,7 @@ jobs:
           
           # 32-bit APK
           OLD_NAME_32="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-          NEW_NAME_32="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-arm32.apk"
+          NEW_NAME_32="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-(32-Bit).apk"
 
           if [ -f "$OLD_NAME_32" ]; then
             echo "Renaming 32-bit APK..."
@@ -216,7 +216,7 @@ jobs:
   # 📢 DISCORD NOTIFICATION
   # --------------------------------------
   notify:
-    needs: [setup, android-release, web-deploy]
+    needs: [android-release, web-deploy]
     if: always() # Runs even if a previous job failed
     runs-on: ubuntu-latest
     steps:
@@ -225,7 +225,7 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ (needs.android-release.result == 'success' && (needs.web-deploy.result == 'success' || needs.web-deploy.result == 'skipped')) && 'success' || 'failure' }}
-          title: "🚀 Deployment for ${{ needs.setup.outputs.build_name }}"
+          title: "🚀 Deployment for ${{ github.event.release.tag_name }}"
           description: |
             **Android Build:** ${{ needs.android-release.result }}
             **Web Deploy:** ${{ needs.web-deploy.result == 'skipped' && '⏩ Skipped (Pre-release)' || needs.web-deploy.result }}

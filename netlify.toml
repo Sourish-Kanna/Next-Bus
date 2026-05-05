@@ -10,9 +10,3 @@
   # Ensure API_LINK is there in Enviroment Variables
   publish = "build/web"
   command = "bash build.sh"
-
-# --- Flutter Plugin ---
-#[[plugins]]
-#package = "netlify-plugin-flutter"
-#  [plugins.inputs]
-#  channel = "stable"

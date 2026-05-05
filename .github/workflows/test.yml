@@ -116,7 +116,7 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          status: ${{ needs.test-android-release.result == 'success' || 'failure' }}
+          status: ${{ needs.test-android-release.result }} # Let the action map 'success'/'failure' automatically
           title: "🚀 Deployment for Test ${{ github.run_number }}"
           description: |
             **Android Build:** ${{ github.run_number }}
