@@ -11,12 +11,17 @@ import 'package:nextbus/providers/api_caller.dart' show ApiService;
 
 class AuthService with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   User? get user => _auth.currentUser;
 
   AuthService() {
     _initializeAuth();
+    _initializeGoogleSignIn();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    await _googleSignIn.initialize();
   }
 
   /// 🔹 Listen to Firebase auth state changes
@@ -39,19 +44,14 @@ class AuthService with ChangeNotifier {
         userCredential = await _auth.signInWithPopup(GoogleAuthProvider());
       } else {
         AppLogger.info("Starting Google Sign-In (Mobile)...");
-        final googleUser = await _googleSignIn.signIn();
-
-        if (googleUser == null) {
-          AppLogger.info("Google Sign-In canceled by user.");
-          return null;
-        }
+        final googleUser = await _googleSignIn.authenticate();
 
         AppLogger.info("Google user chosen: ${googleUser.email}");
 
-        final googleAuth = await googleUser.authentication;
+        final googleAuth = googleUser.authentication;
 
         final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
+          // accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
