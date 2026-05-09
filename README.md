@@ -127,11 +127,11 @@ Pull requests should generally target the `main` branch unless explicitly fixing
 
 ## 📸 Screenshots
 
-Screenshots are stored in: [/docs/screenshots](/docs/screenshots/)
+Screenshots are stored in: [/docs/screenshots](/docs/archive/)
 
-| Home | Admin | Dark Mode |
-| --- | --- | --- |
-| ![Home](docs/screenshots/dark.jpg) | ![Home](docs/screenshots/dark.jpg) | ![Home](docs/screenshots/dark.jpg) |
+| Home | Settings | Dark Mode |
+| :---: | :---: | :---: |
+| ![Home](docs/home.jpg) | ![Setting](docs/setting.jpg) | ![Dark-mode](docs/dark-home.jpg) |
 
 > Screenshots will be updated as the UI stabilizes.
 
