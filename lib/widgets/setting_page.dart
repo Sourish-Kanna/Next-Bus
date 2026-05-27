@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' show Provider;
-import 'package:nextbus/providers/providers.dart' show ThemeProvider;
 import 'package:nextbus/constant.dart' show mobileBreakpoint, seedColorList;
+import 'package:nextbus/providers/providers.dart' show ThemeProvider;
+import 'package:provider/provider.dart' show Provider;
 
 class SettingsGroupCard extends StatelessWidget {
   final String title;
@@ -102,7 +102,7 @@ class ThemeModeSelector extends StatelessWidget {
             segments: const <ButtonSegment<ThemeMode>>[
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.system,
-                label: Text('System'),
+                label: Text('Auto'),
                 icon: Icon(Icons.settings_suggest_rounded),
               ),
               ButtonSegment<ThemeMode>(

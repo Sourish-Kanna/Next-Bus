@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:nextbus/widgets/widgets.dart'
-    show SettingsGroupCard, ThemeSettings;
-import 'package:nextbus/providers/providers.dart'
-    show AuthService, UserDetails, ConnectivityProvider, NavigationProvider;
-import 'package:provider/provider.dart' show ReadContext, WatchContext;
-import 'package:nextbus/pages/pages.dart' show AuthScreen;
-import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:cached_network_image/cached_network_image.dart'
     show CachedNetworkImageProvider;
+import 'package:flutter/material.dart';
+import 'package:nextbus/pages/pages.dart' show AuthScreen;
+import 'package:nextbus/providers/providers.dart'
+    show AuthService, UserDetails, ConnectivityProvider, NavigationProvider;
+import 'package:nextbus/widgets/widgets.dart'
+    show SettingsGroupCard, ThemeSettings;
+import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
+import 'package:provider/provider.dart' show ReadContext, WatchContext;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../common.dart';
@@ -273,9 +273,58 @@ class SettingPage extends StatelessWidget {
                     }
                   }
                   return ListTile(
-                    leading: const Icon(Icons.verified_outlined),
-                    title: const Text("Version"),
-                    subtitle: Text(versionText),
+                    leading: const Icon(Icons.privacy_tip),
+                    title: const Text("About & Privacy"),
+                    subtitle: Text("Version $versionText"),
+                    onTap: () {
+                      showAboutDialog(
+                        context: context,
+                        applicationName: "NextBus",
+                        applicationVersion: versionText,
+                        applicationIcon: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            'assets/logo_new.png',
+                            height: 64,
+                            width: 64,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        children: [
+                          const SizedBox(height: 8),
+
+                          const Text(
+                            "This app uses Google Analytics for product "
+                            "improvement and Firebase Crashlytics "
+                            "for app stability.",
+                          ),
+
+                          // const SizedBox(height: 12),
+                          //
+                          // InkWell(
+                          //   onTap: () {
+                          //     launchUrl(
+                          //       Uri.parse(
+                          //         "https://policies.google.com/privacy",
+                          //       ),
+                          //     );
+                          //   },
+                          //   child: const Text("Google Privacy Policy"),
+                          // ),
+                          //
+                          // InkWell(
+                          //   onTap: () {
+                          //     launchUrl(
+                          //       Uri.parse(
+                          //         "https://firebase.google.com/terms/data-processing-terms",
+                          //       ),
+                          //     );
+                          //   },
+                          //   child: const Text("Firebase Data Processing Terms"),
+                          // ),
+                        ],
+                      );
+                    },
                   );
                 },
               ),
