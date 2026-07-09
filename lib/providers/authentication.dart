@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
-import 'package:flutter/material.dart' show BuildContext, ChangeNotifier;
+import 'package:flutter/material.dart' show BuildContext;
 import 'package:flutter/foundation.dart' show ChangeNotifier, kIsWeb;
 import 'package:nextbus/constant.dart' show urls;
 import 'package:provider/provider.dart' show Provider;
