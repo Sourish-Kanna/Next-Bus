@@ -5,5 +5,5 @@ blank_issues_enabled: false
 # These are links that will appear on the "New Issue" page.
 contact_links:
   - name: 📖 Project Documentation
-    url: https://github.com/Sourish-Kanna/Next-Bus-Frontend/blob/main/README.md
+    url: https://github.com/Sourish-Kanna/Next-Bus/blob/main/README.md
     about: Please check the README for project info before creating an issue.

@@ -8,7 +8,7 @@ class ApiService {
   final Dio _dio = Dio();
   final String baseUrl = Config.apiUrl;
 
-  Future<Response> post(String path, {Map<String,dynamic>? data}) async {
+  Future<Response> post(String path, {Map<String, dynamic>? data}) async {
     final trace = FirebasePerformance.instance.newTrace('post_request');
     await trace.start();
 
@@ -18,18 +18,18 @@ class ApiService {
     }
 
     final idToken = await user.getIdToken();
-    final url = '$baseUrl/v1$path';
+    final url = '$baseUrl/$path';
     AppLogger.info("Hitting $url in POST request");
 
     final response = await _dio.post(
-        url,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $idToken',
-            'Content-Type': 'application/json',
-          },
-        ),
-        data: data
+      url,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+      data: data,
     );
 
     // FIX: Wrap stop in try-catch to prevent web crashes
@@ -43,7 +43,7 @@ class ApiService {
     return response;
   }
 
-  Future<Response> put(String path, {Map<String,dynamic>? data}) async {
+  Future<Response> put(String path, {Map<String, dynamic>? data}) async {
     final trace = FirebasePerformance.instance.newTrace('put_request');
     await trace.start();
 
@@ -53,18 +53,18 @@ class ApiService {
     }
 
     final idToken = await user.getIdToken();
-    final url = '$baseUrl/v1$path';
+    final url = '$baseUrl/$path';
     AppLogger.info("Hitting $url in PUT request");
 
     final response = await _dio.put(
-        url,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $idToken',
-            'Content-Type': 'application/json',
-          },
-        ),
-        data: data
+      url,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+      data: data,
     );
 
     // FIX: Wrap stop in try-catch to prevent web crashes
@@ -77,8 +77,10 @@ class ApiService {
     return response;
   }
 
-
-  Future<Response> get(String path, {Map<String,dynamic>? queryParameters}) async {
+  Future<Response> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
     final trace = FirebasePerformance.instance.newTrace('get_request');
     await trace.start();
 
@@ -88,7 +90,7 @@ class ApiService {
     }
 
     final idToken = await user.getIdToken();
-    final url = '$baseUrl/v1$path';
+    final url = '$baseUrl/$path';
     AppLogger.info("Hitting $url in GET request");
 
     final response = await _dio.get(

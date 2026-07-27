@@ -72,7 +72,7 @@ Designed for real Indian commute conditions.
 
 ---
 
-## 🧑‍💼 Why This Project Matters (For Recruiters)
+## 🧑‍💼 Why This Project Matters
 
 This is not a demo app.
 
@@ -127,11 +127,11 @@ Pull requests should generally target the `main` branch unless explicitly fixing
 
 ## 📸 Screenshots
 
-Screenshots are stored in: [/docs/screenshots](/docs/screenshots/)
+Screenshots are stored in: [/docs/screenshots](/docs/archive/)
 
-| Home | Admin | Dark Mode |
-| --- | --- | --- |
-| ![Home](docs/screenshots/dark.jpg) | ![Home](docs/screenshots/dark.jpg) | ![Home](docs/screenshots/dark.jpg) |
+| Home | Settings | Dark Mode |
+| :---: | :---: | :---: |
+| ![Home](docs/home.jpg) | ![Setting](docs/setting.jpg) | ![Dark-mode](docs/dark-home.jpg) |
 
 > Screenshots will be updated as the UI stabilizes.
 
@@ -169,9 +169,8 @@ Firebase configuration is handled via `flutterfire`.
 
 ## 🧭 Project Status & Roadmap
 
-* 🚧 No active development currently
-* 🔧 Improvements planned for upcoming releases
-* 📍 See **Milestone 3** for future scope
+* 🔧 Maintenance mode — future improvements planned.
+* 📍 See **Milestone 3** for future scope.
 
 ---
 

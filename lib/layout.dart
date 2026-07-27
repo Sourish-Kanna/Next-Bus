@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:nextbus/constant.dart';
-import 'package:nextbus/providers/providers.dart' show UserDetails, NavigationProvider;
+import 'package:nextbus/providers/providers.dart'
+    show UserDetails, NavigationProvider;
 import 'package:nextbus/widgets/widgets.dart' show ConnectivityBanner;
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
+import 'package:shared_preferences/shared_preferences.dart'
+    show SharedPreferences;
 
 // Navigation Item Model
 class NavigationItem {
@@ -138,7 +140,11 @@ class _AppLayoutState extends State<AppLayout> {
   }
 
   // Material 3 NavigationBar (Mobile)
-  Widget? _navigationBar(bool isMobile, List<NavigationItem> destinations, NavigationProvider nav) {
+  Widget? _navigationBar(
+    bool isMobile,
+    List<NavigationItem> destinations,
+    NavigationProvider nav,
+  ) {
     if (!isMobile) return null;
 
     final index = destinations.indexWhere(
@@ -152,17 +158,19 @@ class _AppLayoutState extends State<AppLayout> {
       },
       destinations: destinations
           .map(
-            (item) => NavigationDestination(
-              icon: Icon(item.icon),
-              label: item.label,
-            ),
+            (item) =>
+                NavigationDestination(icon: Icon(item.icon), label: item.label),
           )
           .toList(),
     );
   }
 
   // NavigationRail (Desktop)
-  Widget _navigationRail(BuildContext context, List<NavigationItem> destinations, NavigationProvider nav) {
+  Widget _navigationRail(
+    BuildContext context,
+    List<NavigationItem> destinations,
+    NavigationProvider nav,
+  ) {
     final index = destinations.indexWhere(
       (item) => item.destination == nav.current,
     );
@@ -214,9 +222,7 @@ class _AppLayoutState extends State<AppLayout> {
 
     final destinations = _buildDestinations(userDetails.isAdmin);
 
-    nav.resetIfInvalid(
-      destinations.map((e) => e.destination).toSet(),
-    );
+    nav.resetIfInvalid(destinations.map((e) => e.destination).toSet());
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -227,13 +233,15 @@ class _AppLayoutState extends State<AppLayout> {
         // );
 
         return Scaffold(
-          body: isMobile ?
-          _buildPage(nav.current) :
-          Row(children: [
-            _navigationRail(context, destinations, nav),
-            const VerticalDivider(width: 1),
-            Expanded(child: _buildPage(nav.current))
-          ],),
+          body: isMobile
+              ? _buildPage(nav.current)
+              : Row(
+                  children: [
+                    _navigationRail(context, destinations, nav),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: _buildPage(nav.current)),
+                  ],
+                ),
           bottomNavigationBar: _navigationBar(isMobile, destinations, nav),
         );
       },

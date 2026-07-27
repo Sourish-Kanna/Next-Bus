@@ -38,7 +38,7 @@ class ThemeProvider with ChangeNotifier {
     _isDynamicColor = isDynamic;
     if (isDynamic) {
       _selectedSeedColor =
-      null; // If dynamic, no specific seed color is selected
+          null; // If dynamic, no specific seed color is selected
     } else if (_selectedSeedColor == null && seedColorList.isNotEmpty) {
       // If turning off dynamic and no color was previously selected, default to first
       _selectedSeedColor = fallbackColor;
@@ -60,7 +60,8 @@ class ThemeProvider with ChangeNotifier {
     }
 
     final seedColorIndex = prefs.getInt(_seedColorIndexKey);
-    if (!_isDynamicColor && seedColorIndex != null &&
+    if (!_isDynamicColor &&
+        seedColorIndex != null &&
         seedColorIndex < seedColorList.length) {
       _selectedSeedColor = seedColorList[seedColorIndex];
     } else if (!_isDynamicColor && seedColorList.isNotEmpty) {
@@ -84,7 +85,8 @@ class ThemeProvider with ChangeNotifier {
       }
     } else {
       await prefs.remove(
-          _seedColorIndexKey); // Remove if no seed color (dynamic)
+        _seedColorIndexKey,
+      ); // Remove if no seed color (dynamic)
     }
   }
 }

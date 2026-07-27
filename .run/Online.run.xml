@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Online" type="FlutterRunConfigurationType" factoryName="Flutter">
-    <option name="additionalArgs" value="--dart-define=API_LINK=https://next-bus-backend-0i52.onrender.com --dart-define=ENVIRONMENT=dev" />
-    <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
-    <method v="2" />
-  </configuration>
-</component>

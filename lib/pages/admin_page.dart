@@ -3,7 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:nextbus/providers/providers.dart' show AuthService, RouteProvider, TimetableProvider, UserDetails, ConnectivityProvider;
+import 'package:nextbus/providers/providers.dart'
+    show
+        AuthService,
+        RouteProvider,
+        TimetableProvider,
+        UserDetails,
+        ConnectivityProvider;
 import 'package:nextbus/common.dart';
 import 'package:nextbus/widgets/widgets.dart'; // Reusable widgets
 
@@ -21,7 +27,10 @@ class AdminPage extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              icon: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary),
+              icon: Icon(
+                Icons.swap_horiz,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               title: const Text("Switch Active Route"),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -30,8 +39,13 @@ class AdminPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                     ),
                     initialValue: selectedRoute,
                     items: routes.map((route) {
@@ -40,7 +54,8 @@ class AdminPage extends StatelessWidget {
                         child: Text("Route $route"),
                       );
                     }).toList(),
-                    onChanged: (newValue) => setState(() => selectedRoute = newValue!),
+                    onChanged: (newValue) =>
+                        setState(() => selectedRoute = newValue!),
                   ),
                 ],
               ),
@@ -54,7 +69,10 @@ class AdminPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                     routeProvider.setRoute(selectedRoute);
-                    CustomSnackBar.showInfo(context, "Switched to Route $selectedRoute");
+                    CustomSnackBar.showInfo(
+                      context,
+                      "Switched to Route $selectedRoute",
+                    );
                   },
                 ),
               ],
@@ -85,44 +103,75 @@ class AdminPage extends StatelessWidget {
               children: [
                 TextField(
                   controller: routeNameController,
-                  decoration: const InputDecoration(labelText: "Route Name (e.g. 56A)", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "Route Name (e.g. 56A)",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: startController,
-                  decoration: const InputDecoration(labelText: "Start Point", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "Start Point",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: endController,
-                  decoration: const InputDecoration(labelText: "End Point", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "End Point",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: stopsController,
-                  decoration: const InputDecoration(labelText: "Stops (comma separated)", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "Stops (comma separated)",
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 10),
                 ListTile(
                   title: const Text("Initial Timing"),
-                  trailing: Text(selectedTime.format(context), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey.shade400)),
+                  trailing: Text(
+                    selectedTime.format(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.grey.shade400),
+                  ),
                   onTap: () async {
-                    final picked = await showTimePicker(context: context, initialTime: selectedTime);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    );
                     if (picked != null) setState(() => selectedTime = picked);
                   },
                 ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
               FilledButton(
                 onPressed: () async {
                   if (routeNameController.text.isEmpty) return;
 
-                  final provider = Provider.of<TimetableProvider>(context, listen: false);
-                  List<String> stops = stopsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                  final provider = Provider.of<TimetableProvider>(
+                    context,
+                    listen: false,
+                  );
+                  List<String> stops = stopsController.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
                   final String timeStr = selectedTime.format(context);
 
                   await provider.addRoute(
@@ -135,7 +184,10 @@ class AdminPage extends StatelessWidget {
 
                   if (context.mounted) {
                     Navigator.pop(context);
-                    CustomSnackBar.showSuccess(context, "Route ${routeNameController.text} Added!");
+                    CustomSnackBar.showSuccess(
+                      context,
+                      "Route ${routeNameController.text} Added!",
+                    );
                   }
                 },
                 child: const Text("Create"),
@@ -148,7 +200,10 @@ class AdminPage extends StatelessWidget {
   }
 
   // --- 3. UPDATE TIMING (Input Form) ---
-  void _showUpdateTimingDialog(BuildContext context, RouteProvider routeProvider) {
+  void _showUpdateTimingDialog(
+    BuildContext context,
+    RouteProvider routeProvider,
+  ) {
     String selectedRoute = routeProvider.route;
     final stopNameController = TextEditingController();
     TimeOfDay selectedTime = TimeOfDay.now();
@@ -164,34 +219,57 @@ class AdminPage extends StatelessWidget {
               children: [
                 DropdownButtonFormField<String>(
                   initialValue: selectedRoute,
-                  decoration: const InputDecoration(labelText: "Route", border: OutlineInputBorder()),
-                  items: routeProvider.availableRoutes.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: "Route",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: routeProvider.availableRoutes
+                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                      .toList(),
                   onChanged: (val) => setState(() => selectedRoute = val!),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: stopNameController,
-                  decoration: const InputDecoration(labelText: "Stop Name (e.g. Station)", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "Stop Name (e.g. Station)",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 ListTile(
                   title: const Text("New Timing"),
-                  trailing: Text(selectedTime.format(context), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey.shade400)),
+                  trailing: Text(
+                    selectedTime.format(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.grey.shade400),
+                  ),
                   onTap: () async {
-                    final picked = await showTimePicker(context: context, initialTime: selectedTime);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    );
                     if (picked != null) setState(() => selectedTime = picked);
                   },
                 ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
               FilledButton(
                 onPressed: () async {
                   if (stopNameController.text.isEmpty) return;
 
-                  final provider = Provider.of<TimetableProvider>(context, listen: false);
+                  final provider = Provider.of<TimetableProvider>(
+                    context,
+                    listen: false,
+                  );
                   final String timeStr = selectedTime.format(context);
 
                   await provider.updateTime(
@@ -202,7 +280,10 @@ class AdminPage extends StatelessWidget {
 
                   if (context.mounted) {
                     Navigator.pop(context);
-                    CustomSnackBar.showSuccess(context, "Updated $selectedRoute at $timeStr");
+                    CustomSnackBar.showSuccess(
+                      context,
+                      "Updated $selectedRoute at $timeStr",
+                    );
                   }
                 },
                 child: const Text("Update"),
@@ -227,7 +308,8 @@ class AdminPage extends StatelessWidget {
     final packageInfo = await PackageInfo.fromPlatform();
 
     // 3. Construct the Mega-Log
-    final String debugInfo = """
+    final String debugInfo =
+        """
 [SYSTEM DIAGNOSTICS]
 ====================
 APP INFO
@@ -265,7 +347,10 @@ ${DateTime.now().toIso8601String()}
       context: context,
       builder: (context) {
         return AlertDialog(
-          icon: Icon(Icons.bug_report, color: Theme.of(context).colorScheme.tertiary),
+          icon: Icon(
+            Icons.bug_report,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
           title: const Text("System State Dump"),
           scrollable: true,
           content: Column(
@@ -275,11 +360,16 @@ ${DateTime.now().toIso8601String()}
                 width: double.maxFinite,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
-                child: SelectableText( // Allows text selection on mobile
+                child: SelectableText(
+                  // Allows text selection on mobile
                   debugInfo,
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
                 ),
@@ -310,13 +400,18 @@ ${DateTime.now().toIso8601String()}
     final authService = Provider.of<AuthService>(context);
     final User? user = authService.user;
     final routeProvider = Provider.of<RouteProvider>(context);
-    final busTimingProvider = Provider.of<TimetableProvider>(context, listen: false);
+    final busTimingProvider = Provider.of<TimetableProvider>(
+      context,
+      listen: false,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Admin Dashboard",style: TextStyle(fontWeight: FontWeight.bold),),
+        title: const Text(
+          "Admin Dashboard",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -325,7 +420,9 @@ ${DateTime.now().toIso8601String()}
           Card(
             elevation: 0,
             color: Theme.of(context).colorScheme.primaryContainer,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               leading: CircleAvatar(
@@ -350,7 +447,9 @@ ${DateTime.now().toIso8601String()}
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -359,13 +458,17 @@ ${DateTime.now().toIso8601String()}
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Active Route", style: Theme.of(context).textTheme.labelMedium),
+                        Text(
+                          "Active Route",
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
                         Text(
                           "Route ${routeProvider.route}",
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
@@ -408,7 +511,10 @@ ${DateTime.now().toIso8601String()}
                 onTap: () async {
                   await busTimingProvider.fetchTimetable(routeProvider.route);
                   if (context.mounted) {
-                    CustomSnackBar.show(context, "Data fetched. Check debug logs.");
+                    CustomSnackBar.show(
+                      context,
+                      "Data fetched. Check debug logs.",
+                    );
                   }
                 },
               ),

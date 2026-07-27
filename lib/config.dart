@@ -8,7 +8,10 @@ import 'package:nextbus/common.dart';
 const String _defaultEnv = kReleaseMode ? 'prod' : 'dev';
 
 // 2. Allow manual override via command line if needed
-const String _environment = String.fromEnvironment('ENVIRONMENT', defaultValue: _defaultEnv);
+const String _environment = String.fromEnvironment(
+  'ENVIRONMENT',
+  defaultValue: _defaultEnv,
+);
 
 const String _localApiUrl = String.fromEnvironment('API_LINK');
 

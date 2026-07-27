@@ -7,13 +7,13 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 class CustomSnackBar {
   /// Base method for showing a SnackBar
   static void show(
-      BuildContext context,
-      String text, {
-        VoidCallback? onUndo,
-        Color? backgroundColor,
-        Color? foregroundColor,
-        IconData? icon,
-      }) {
+    BuildContext context,
+    String text, {
+    VoidCallback? onUndo,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    IconData? icon,
+  }) {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -25,7 +25,9 @@ class CustomSnackBar {
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
         content: Row(
           children: [
             if (icon != null) ...[
@@ -42,10 +44,10 @@ class CustomSnackBar {
         ),
         action: onUndo != null
             ? SnackBarAction(
-          label: "UNDO",
-          textColor: colorScheme.inversePrimary,
-          onPressed: onUndo,
-        )
+                label: "UNDO",
+                textColor: colorScheme.inversePrimary,
+                onPressed: onUndo,
+              )
             : null,
       ),
     );
@@ -79,11 +81,7 @@ class CustomSnackBar {
 
   /// Shortcut for Info/General messages (uses default M3 Inverse Surface)
   static void showInfo(BuildContext context, String text, {IconData? icon}) {
-    show(
-      context,
-      text,
-      icon: icon ?? Icons.info_outline_rounded,
-    );
+    show(context, text, icon: icon ?? Icons.info_outline_rounded);
   }
 }
 

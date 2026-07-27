@@ -13,14 +13,18 @@ class UserDetails with ChangeNotifier {
   bool get isAdmin => _isAdmin;
   bool get isLoggedIn => _isLoggedIn;
   bool get isGuest => _isGuest;
-  String get accessLevel => _isGuest ? "Guest" : isAdmin ? "Admin" : "User";
+  String get accessLevel => _isGuest
+      ? "Guest"
+      : isAdmin
+      ? "Admin"
+      : "User";
 
   /// Main function to get user data.
   /// Strategy: Load Cache (Instant) -> Fetch API (Background) -> Update Cache
   Future<void> fetchUserDetails({bool isInit = false}) async {
     // 1. LOAD FROM CACHE FIRST IF AVAILABLE AND NOT INITIALIZING
     // This gives immediate UI feedback (e.g. shows Admin Dashboard) even before the API returns.
-    if (await _loadFromCache() == true && !isInit){
+    if (await _loadFromCache() == true && !isInit) {
       notifyListeners();
       return;
     }
@@ -44,11 +48,17 @@ class UserDetails with ChangeNotifier {
         // Save these new values so they work offline next time
         await _saveToCache();
       } else {
-        AppLogger.error("API response invalid. Keeping cached data.", result.data);
+        AppLogger.error(
+          "API response invalid. Keeping cached data.",
+          result.data,
+        );
         // Note: We do NOT reset to guest here. We trust the cache if the API sends junk.
       }
     } catch (e) {
-      AppLogger.error("Network error fetching user details. Using cached data.", e);
+      AppLogger.error(
+        "Network error fetching user details. Using cached data.",
+        e,
+      );
       // Note: We swallow the error so the UI stays in "Offline Mode" using the last known good state.
     }
 
@@ -65,7 +75,9 @@ class UserDetails with ChangeNotifier {
         _isAdmin = prefs.getBool('user_isAdmin') ?? false;
         _isLoggedIn = prefs.getBool('user_isLoggedIn') ?? false;
         _isGuest = prefs.getBool('user_isGuest') ?? true;
-        AppLogger.info("Loaded User from Cache: Admin=$_isAdmin, Guest=$_isGuest");
+        AppLogger.info(
+          "Loaded User from Cache: Admin=$_isAdmin, Guest=$_isGuest",
+        );
       }
       return true;
     } catch (e) {

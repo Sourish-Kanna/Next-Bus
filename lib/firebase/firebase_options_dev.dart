@@ -69,8 +69,10 @@ class DevFirebaseOptions {
     messagingSenderId: '525382805804',
     projectId: 'next-bus-dev',
     storageBucket: 'next-bus-dev.firebasestorage.app',
-    androidClientId: '525382805804-0cqj328385bgvgrh447le5ef8ej9qkrq.apps.googleusercontent.com',
-    iosClientId: '525382805804-keo6nkkucts1m15afvbj854srur8kluo.apps.googleusercontent.com',
+    androidClientId:
+        '525382805804-0cqj328385bgvgrh447le5ef8ej9qkrq.apps.googleusercontent.com',
+    iosClientId:
+        '525382805804-keo6nkkucts1m15afvbj854srur8kluo.apps.googleusercontent.com',
     iosBundleId: 'com.sourish.nextbus',
   );
 }
