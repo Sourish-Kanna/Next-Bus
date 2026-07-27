@@ -169,9 +169,8 @@ Firebase configuration is handled via `flutterfire`.
 
 ## 🧭 Project Status & Roadmap
 
-* 🚧 No active development currently
-* 🔧 Improvements planned for upcoming releases
-* 📍 See **Milestone 3** for future scope
+* 🔧 Maintenance mode — future improvements planned.
+* 📍 See **Milestone 3** for future scope.
 
 ---
 
