@@ -72,9 +72,13 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/logo_new.png"
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+  # Adaptive Icon Config (Android 8.0+)
   adaptive_icon_background: "#039AE4"
-  adaptive_icon_foreground: "assets/logo_new_fg.png"
+  adaptive_icon_foreground: "assets/logo_fg.png"
+  # Android 13+ Monochromatic/Themed Home Screen Icon Config
+  adaptive_icon_monochrome: "assets/logo_mono.png"
   web:
     generate: true
 
