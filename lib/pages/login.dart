@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:nextbus/providers/providers.dart' show AuthService;
 import 'package:nextbus/layout.dart';
+import 'package:nextbus/providers/providers.dart' show AuthService;
+import 'package:provider/provider.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -30,7 +30,7 @@ class AuthScreen extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(28),
                     child: Image.asset(
-                      'assets/logo_new.png',
+                      'assets/logo.png',
                       height: 120,
                       width: 120,
                       fit: BoxFit.cover,

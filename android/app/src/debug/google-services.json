@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "525382805804-5euibrqht93kmrqob1gagsmu1f3knopq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sourish.nextbus.debug",
+            "certificate_hash": "907b58001f4f199b672451ec204a5ff6b57cd2a9"
+          }
+        },
+        {
           "client_id": "525382805804-htu88gfrfroovbu5j8er91bu215bj8g0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
