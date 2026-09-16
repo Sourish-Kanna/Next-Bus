@@ -70,15 +70,20 @@ class UserDetails with ChangeNotifier {
   Future<bool> _loadFromCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Only load if keys exist, otherwise stick to default Guest
-      if (prefs.containsKey('user_isGuest')) {
-        _isAdmin = prefs.getBool('user_isAdmin') ?? false;
-        _isLoggedIn = prefs.getBool('user_isLoggedIn') ?? false;
-        _isGuest = prefs.getBool('user_isGuest') ?? true;
-        AppLogger.info(
-          "Loaded User from Cache: Admin=$_isAdmin, Guest=$_isGuest",
-        );
+
+      // Return true only when a cached user state actually exists.
+      if (!prefs.containsKey('user_isGuest')) {
+        return false;
       }
+
+      _isAdmin = prefs.getBool('user_isAdmin') ?? false;
+      _isLoggedIn = prefs.getBool('user_isLoggedIn') ?? false;
+      _isGuest = prefs.getBool('user_isGuest') ?? true;
+
+      AppLogger.info(
+        "Loaded User from Cache: Admin=$_isAdmin, Guest=$_isGuest",
+      );
+
       return true;
     } catch (e) {
       AppLogger.warn("Failed to load user cache: $e");
