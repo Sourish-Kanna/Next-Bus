@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart'
     show CachedNetworkImageProvider;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nextbus/pages/pages.dart' show AuthScreen;
 import 'package:nextbus/providers/providers.dart'
     show AuthService, UserDetails, ConnectivityProvider, NavigationProvider;

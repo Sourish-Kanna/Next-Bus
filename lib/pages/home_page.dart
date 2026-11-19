@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nextbus/widgets/widgets.dart'
     show TimetableDisplay, ReportBusSheet, TimetableDisplayState;
 import 'package:provider/provider.dart' show Provider;

@@ -8,7 +8,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart'
     show FirebaseCrashlytics;
 import 'package:flutter/foundation.dart'
     show kIsWeb, PlatformDispatcher, TargetPlatform, defaultTargetPlatform;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart'
     show InternetCheckOption, InternetConnection;

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nextbus/providers/connectivity.dart';
 import 'package:nextbus/widgets/connectivity_banner.dart';

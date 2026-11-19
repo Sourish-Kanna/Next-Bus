@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart' show ColorHarmonization;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart' show Consumer, Provider;
 import 'package:nextbus/providers/providers.dart'

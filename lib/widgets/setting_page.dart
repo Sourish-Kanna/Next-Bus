@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nextbus/constant.dart' show mobileBreakpoint, seedColorList;
 import 'package:nextbus/providers/providers.dart' show ThemeProvider;
 import 'package:provider/provider.dart' show Provider;

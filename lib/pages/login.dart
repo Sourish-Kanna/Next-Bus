@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nextbus/layout.dart';
 import 'package:nextbus/providers/providers.dart' show AuthService;
 import 'package:provider/provider.dart';
