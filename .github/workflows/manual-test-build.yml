@@ -6,119 +6,68 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-android-release:
     name: 📱 Android Test APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v5
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
 
-      - name: ☕ Setup Java
+      - name: ☕ Setup Java (+ Gradle cache)
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
-      - name: 🐦 Install Flutter (cached)
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: 📦 Flutter Pub Get
+      - name: 📦 Pub get
         run: flutter pub get
 
-      - name: ⚡ Restore Gradle Cache
-        id: gradle-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/build.gradle*', 'android/**/settings.gradle*', 'android/**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: 📊 Gradle Cache Status
+      - name: 🔐 Decode keystore + Firebase config
         run: |
-          echo "Gradle cache hit: ${{ steps.gradle-cache.outputs.cache-hit }}"
-
-      - name: 🔐 Decode Keystore
-        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
-
-      - name: 🔥 Decode Firebase Config (Prod)
-        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
           mkdir -p android/app/src/release
           echo "${{ secrets.FIREBASE_JSON_RELEASE }}" | base64 --decode > android/app/src/release/google-services.json
+          test -s android/app/upload-keystore.jks || { echo "::error::Keystore missing or empty"; exit 1; }
+          test -s android/app/src/release/google-services.json || { echo "::error::Firebase config missing or empty"; exit 1; }
 
-      - name: 📱 Build Signed APK (TEST - Release-like)
+      - name: 📱 Build signed APKs (test)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          GRADLE_OPTS: >
-            -Xmx4G
-            -Dorg.gradle.daemon=false
-            -Dfile.encoding=UTF-8
-        run: >
-          flutter build apk --split-per-abi --release
-          --build-number ${{ github.run_number }}
-          --dart-define=API_LINK=${{ secrets.API_LINK }}
-          --dart-define=ENVIRONMENT=prod
-
-      - name: ✏️ Rename APKs (same as Release)
+          API_LINK: ${{ secrets.API_LINK }}
+          GRADLE_OPTS: -Xmx4G -Dorg.gradle.daemon=false -Dfile.encoding=UTF-8
         run: |
-          BUILD_VERSION="${{ github.run_number }}"
+          flutter build apk --split-per-abi --target-platform android-arm64 --release \
+            --build-number "${{ github.run_number }}" \
+            --dart-define=API_LINK="$API_LINK" \
+            --dart-define=ENVIRONMENT=prod
 
-          # 64-bit
-          OLD_64="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
-          NEW_64="build/app/outputs/flutter-apk/Next-Bus-Test-${BUILD_VERSION}-arm64.apk"
+      - name: ✏️ Rename APKs
+        run: |
+          DIR=build/app/outputs/flutter-apk
+          N=${{ github.run_number }}
+          mv "$DIR/app-arm64-v8a-release.apk" "$DIR/Next-Bus-Test-${N}-arm64.apk"
+          ls -la "$DIR"
 
-          if [ -f "$OLD_64" ]; then
-            mv "$OLD_64" "$NEW_64"
-          fi
-
-          # 32-bit
-          OLD_32="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-          NEW_32="build/app/outputs/flutter-apk/Next-Bus-Test-${BUILD_VERSION}-arm32.apk"
-
-          if [ -f "$OLD_32" ]; then
-            mv "$OLD_32" "$NEW_32"
-          fi
-          
-          # Android Emulator
-          OLD_X64="build/app/outputs/flutter-apk/app-x86_64-release.apk"
-          NEW_X64="build/app/outputs/flutter-apk/Next-Bus-Test-${BUILD_VERSION}-x86_64.apk"
-
-          if [ -f "$OLD_X64" ]; then
-            mv "$OLD_X64" "$NEW_X64"
-          fi
-
-          ls -la build/app/outputs/flutter-apk/
-
-      - name: 📦 Upload Test APKs
-        uses: actions/upload-artifact@v6
+      - name: 📦 Upload test APKs
+        uses: actions/upload-artifact@v7
         with:
           name: test-apks-${{ github.run_number }}
           path: build/app/outputs/flutter-apk/Next-Bus-Test-*.apk
+          if-no-files-found: error
           retention-days: 3
-  # --------------------------------------
-  # 📢 DISCORD NOTIFICATION
-  # --------------------------------------
-  notify:
-    needs: [test-android-release]
-    if: always() # Runs even if a previous job failed
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📢 Send Discord Notification
-        uses: sarisia/actions-status-discord@v1
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          status: ${{ needs.test-android-release.result }} # Let the action map 'success'/'failure' automatically
-          title: "🚀 Deployment for Test ${{ github.run_number }}"
-          description: |
-            **Android Build:** ${{ github.run_number }}
-            
-            Check the progress here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          archive: false

@@ -8,203 +8,99 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    name: Analyze & Test
+    uses: ./.github/workflows/flutter-analyze-test.yml
 
-  # --------------------------------------
-  # 🔥 PRE-CACHE JOB (runs once)
-  # --------------------------------------
-  precache:
-    name: 🔥 Pre-cache Flutter & Gradle
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v5
-
-      - name: ☕ Setup Java
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: 🐦 Install Flutter (cached)
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: 📦 Flutter Pub Get (warm cache)
-        run: flutter pub get
-
-      - name: ⚡ Cache Gradle
-        id: gradle-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/build.gradle*', 'android/**/settings.gradle*', 'android/**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: 📊 Gradle Cache Status
-        run: |
-          if [ "${{ steps.gradle-cache.outputs.cache-hit }}" = "true" ]; then
-            echo "✅ Gradle cache HIT"
-          else
-            echo "🆕 Gradle cache MISS (created)"
-          fi
-
-      - name: 🔍 Tool Versions
-        run: |
-            flutter --version
-            java -version
-
-  # --------------------------------------
-  # 🔢 SETUP JOB
-  # --------------------------------------
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      build_name: ${{ steps.vars.outputs.build_name }}
-      build_number: ${{ steps.vars.outputs.build_number }}
-
-    steps:
-      - name: 🔢 Set build variables
-        id: vars
-        run: |
-          echo "build_name=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
-          echo "Using Build Name: ${{ github.event.release.tag_name }}"
-          echo "Using Build Number: ${{ github.run_number }}"
-
-  # --------------------------------------
-  # 📱 ANDROID RELEASE
-  # --------------------------------------
   android-release:
-    needs: [setup, precache]
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name }}
 
     steps:
-      - name: 📥 Checkout release tag
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.setup.outputs.build_name }}
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
 
-      - name: ☕ Setup Java
+      - name: ☕ Setup Java (+ Gradle cache)
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
-      - name: 🐦 Install Flutter
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: ⚡ Restore Gradle Cache
-        id: gradle-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/build.gradle*', 'android/**/settings.gradle*', 'android/**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: 🔐 Decode Keystore
-        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
-
-      - name: 🔥 Decode Firebase Config
+      - name: 🔐 Decode keystore + Firebase config
         run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
           mkdir -p android/app/src/release
           echo "${{ secrets.FIREBASE_JSON_RELEASE }}" | base64 --decode > android/app/src/release/google-services.json
+          test -s android/app/upload-keystore.jks || { echo "::error::Keystore missing or empty"; exit 1; }
+          test -s android/app/src/release/google-services.json || { echo "::error::Firebase config missing or empty"; exit 1; }
 
-      - name: 📱 Build Signed APK (Gradle Cache ON)
+      - name: 📱 Build signed APK (arm64)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          GRADLE_OPTS: >
-            -Xmx4G
-            -Dorg.gradle.daemon=false
-            -Dfile.encoding=UTF-8
-            -Dorg.gradle.caching.debug=true
-        run: >
-          flutter build apk --split-per-abi --release
-          --build-name ${{ needs.setup.outputs.build_name }}
-          --build-number ${{ needs.setup.outputs.build_number }}
-          --dart-define=API_LINK=${{ secrets.API_LINK }}
-          --dart-define=ENVIRONMENT=prod
-
-      - name: ✏️ Rename APKs
+          API_LINK: ${{ secrets.API_LINK }}
+          GRADLE_OPTS: -Xmx4G -Dorg.gradle.daemon=false -Dfile.encoding=UTF-8
         run: |
-          BUILD_NAME="${{ needs.setup.outputs.build_name }}"
-          
-          # 64-bit APK
-          OLD_NAME_64="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
-          NEW_NAME_64="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-(64-Bit).apk"
-          
-          if [ -f "$OLD_NAME_64" ]; then
-            echo "Renaming 64-bit APK..."
-            mv $OLD_NAME_64 $NEW_NAME_64
-          else
-             echo "⚠️ 64-bit APK not found!"
-          fi
-          
-          # 32-bit APK
-          OLD_NAME_32="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-          NEW_NAME_32="build/app/outputs/flutter-apk/Next-Bus-${BUILD_NAME}-(32-Bit).apk"
+          flutter build apk --split-per-abi --target-platform android-arm64 --release \
+            --build-name "${TAG#v}" \
+            --build-number "${{ github.run_number }}" \
+            --dart-define=API_LINK="$API_LINK" \
+            --dart-define=ENVIRONMENT=prod
 
-          if [ -f "$OLD_NAME_32" ]; then
-            echo "Renaming 32-bit APK..."
-            mv $OLD_NAME_32 $NEW_NAME_32
-          else
-             echo "⚠️ 32-bit APK not found!"
-          fi
+      - name: ✏️ Rename APK
+        run: |
+          DIR=build/app/outputs/flutter-apk
+          mv "$DIR/app-arm64-v8a-release.apk" "$DIR/Next-Bus-${TAG}-(64-Bit).apk"
 
-      - name: 🚀 Upload Signed APKs to GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: 🚀 Upload to GitHub Release
+        uses: softprops/action-gh-release@v3
         with:
           files: build/app/outputs/flutter-apk/Next-Bus-*.apk
+          fail_on_unmatched_files: true
 
-  # --------------------------------------
-  # 🌍 WEB DEPLOY (Firebase)
-  # --------------------------------------
   web-deploy:
-    needs: [setup, precache]
-    # 🔥 This line ensures it only runs for full releases
+    needs: verify
     if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
       pull-requests: write
+    env:
+      TAG: ${{ github.event.release.tag_name }}
 
     steps:
-      - name: 📥 Checkout release tag
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.setup.outputs.build_name }}
+      - name: 📥 Checkout
+        uses: actions/checkout@v7
 
-      - name: 🐦 Install Flutter
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
       - name: 🕸️ Build Web
-        run: >
-          flutter build web --release
-          --wasm
-          --dart-define=API_LINK=${{ secrets.API_LINK }}
-          --dart-define=ENVIRONMENT=prod
-          --build-name ${{ needs.setup.outputs.build_name }}
+        env:
+          API_LINK: ${{ secrets.API_LINK }}
+        run: |
+          flutter build web --release --wasm \
+            --dart-define=API_LINK="$API_LINK" \
+            --dart-define=ENVIRONMENT=prod \
+            --build-name "${TAG#v}"
 
-      - name: 🔥 Deploy to Firebase Hosting (cached)
+      - name: 🔥 Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
@@ -212,22 +108,28 @@ jobs:
           channelId: live
           projectId: app-nextbus
 
-  # --------------------------------------
-  # 📢 DISCORD NOTIFICATION
-  # --------------------------------------
   notify:
-    needs: [android-release, web-deploy]
-    if: always() # Runs even if a previous job failed
+    needs: [verify, android-release, web-deploy]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: 📢 Send Discord Notification
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          status: ${{ (needs.android-release.result == 'success' && (needs.web-deploy.result == 'success' || needs.web-deploy.result == 'skipped')) && 'success' || 'failure' }}
-          title: "🚀 Deployment for ${{ github.event.release.tag_name }}"
+          status: ${{ (needs.verify.result == 'success' && needs.android-release.result == 'success' && (needs.web-deploy.result == 'success' || needs.web-deploy.result == 'skipped')) && 'success' || (contains(needs.*.result, 'cancelled') && 'cancelled' || 'failure') }}
+          nodetail: true
+          title: "Next Bus ${{ github.event.release.tag_name }}"
           description: |
+            **Repo:** ${{ github.repository }}
+            **Workflow:** ${{ github.workflow }}
+            **Triggered by:** ${{ github.actor }}
+
+            **Analyze & Test:** ${{ needs.verify.result }}
             **Android Build:** ${{ needs.android-release.result }}
-            **Web Deploy:** ${{ needs.web-deploy.result == 'skipped' && '⏩ Skipped (Pre-release)' || needs.web-deploy.result }}
-            
-            Check the progress here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            **Web Deploy:** ${{ needs.web-deploy.result == 'skipped' && '⏩ Skipped (pre-release)' || needs.web-deploy.result }}
+
+            [Download release](${{ github.event.release.html_url }})
+            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          color: ${{ (needs.android-release.result == 'success' && needs.verify.result == 'success') && '0x2ecc71' || '0xe74c3c' }}
+          url: ${{ github.event.release.html_url }}
